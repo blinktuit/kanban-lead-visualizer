@@ -31,6 +31,8 @@
   overflow-x: auto;
   width: 100%;
   position: relative;
+  padding-bottom: 16px; /* Space for the scrollbar */
+  height: calc(100vh - 120px);
 }
 
 .kanban-flex-container {
@@ -69,6 +71,9 @@
   padding: 0.1rem 0.5rem;
   border-radius: 0.25rem;
   font-weight: 500;
+  line-height: 1.2;
+  height: 1.5rem;
+  white-space: nowrap;
 }
 
 .tag-blue {
@@ -102,6 +107,7 @@
   color: hsl(var(--muted-foreground));
   cursor: pointer;
   transition: all 0.2s;
+  margin-right: 4px;
   margin-left: 4px;
 }
 
@@ -123,4 +129,56 @@
 .kanban-card {
   height: 110px;
   overflow: hidden;
+  padding: 12px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease-out;
+  border-radius: 8px;
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+}
+
+/* Column content styling */
+.kanban-column-content {
+  flex-grow: 1;
+  overflow: hidden;
+  max-height: calc(100vh - 250px);
+  height: 100%;
+}
+
+/* Fixed top navigation */
+.kanban-board-container {
+  padding: 16px;
+  overflow-x: auto;
+  height: calc(100vh - 120px);
+}
+
+/* Override the scrollbar styles */
+.kanban-flex-container::-webkit-scrollbar,
+.kanban-column-content::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.kanban-flex-container::-webkit-scrollbar-track,
+.kanban-column-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.kanban-flex-container::-webkit-scrollbar-thumb,
+.kanban-column-content::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted));
+  border-radius: 999px;
+}
+
+/* Column design */
+.kanban-column {
+  min-width: 280px;
+  max-width: 280px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--kanban-column));
+  padding: 12px;
 }

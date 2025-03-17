@@ -105,7 +105,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           
           {settings.cardFields.showTags && (
             <div className="flex justify-between items-center mt-2">
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center gap-1 flex-wrap">
                 {displayTag && (
                   <span className={cn("tag", getTagClass(displayTag.color))}>
                     {displayTag.name}
