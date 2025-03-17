@@ -11,19 +11,19 @@ const Sidebar = () => {
 
   return (
     <div className={cn(
-      "bg-sidebar fixed inset-y-0 left-0 z-30 transform transition-all duration-300 ease-in-out",
-      "flex flex-col border-r border-sidebar-border bg-sidebar-background",
+      "bg-[#222222] fixed inset-y-0 left-0 z-30 transform transition-all duration-300 ease-in-out",
+      "flex flex-col border-r border-zinc-800 text-white",
       collapsed ? "w-16" : "w-64"
     )}>
-      <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
+      <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
         <h1 className={cn(
-          "text-xl font-medium text-sidebar-foreground transition-opacity duration-200",
+          "text-xl font-medium text-white transition-opacity duration-200",
           collapsed ? "opacity-0 w-0" : "opacity-100"
         )}>
           Linqed.io
         </h1>
         <button 
-          className="text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors"
+          className="text-white/70 hover:text-white transition-colors"
           onClick={() => setCollapsed(!collapsed)}
         >
           {collapsed ? (
@@ -36,12 +36,18 @@ const Sidebar = () => {
       
       <div className="flex-1 overflow-y-auto py-4 px-3">
         <nav className="space-y-1">
-          <Link to="/" className={cn("sidebar-item", location.pathname === '/' && "active")}>
+          <Link to="/" className={cn(
+            "flex items-center gap-2 w-full text-sm px-3 py-2 rounded-md text-white/80 hover:text-white hover:bg-zinc-800 transition-colors duration-200",
+            location.pathname === '/' && "bg-zinc-800 text-white"
+          )}>
             <PieChart className="w-5 h-5" />
             <span className={cn("transition-opacity duration-200", collapsed ? "opacity-0 w-0" : "opacity-100")}>Dashboard</span>
           </Link>
           
-          <Link to="/connections" className={cn("sidebar-item", location.pathname === '/connections' && "active")}>
+          <Link to="/connections" className={cn(
+            "flex items-center gap-2 w-full text-sm px-3 py-2 rounded-md text-white/80 hover:text-white hover:bg-zinc-800 transition-colors duration-200",
+            location.pathname === '/connections' && "bg-zinc-800 text-white"
+          )}>
             <Users className="w-5 h-5" />
             <span className={cn("transition-opacity duration-200", collapsed ? "opacity-0 w-0" : "opacity-100")}>Connecties</span>
           </Link>
@@ -49,8 +55,8 @@ const Sidebar = () => {
           <div className="relative">
             <button 
               className={cn(
-                "sidebar-item w-full flex justify-between", 
-                location.pathname === '/pipeline' && "active"
+                "flex items-center gap-2 w-full text-sm px-3 py-2 rounded-md text-white/80 hover:text-white hover:bg-zinc-800 transition-colors duration-200 justify-between", 
+                location.pathname === '/pipeline' && "bg-zinc-800 text-white"
               )}
               onClick={() => setPipelineOpen(!pipelineOpen)}
             >
@@ -71,26 +77,32 @@ const Sidebar = () => {
               collapsed && "hidden"
             )}>
               <Link to="/pipeline?id=pipeline1" 
-                className="sidebar-item text-sm py-1.5">
+                className="flex items-center w-full text-sm py-1.5 px-2 rounded-md text-white/80 hover:text-white hover:bg-zinc-800 transition-colors duration-200">
                 Verkoop Pipeline
               </Link>
               <Link to="/pipeline?id=pipeline2" 
-                className="sidebar-item text-sm py-1.5">
+                className="flex items-center w-full text-sm py-1.5 px-2 rounded-md text-white/80 hover:text-white hover:bg-zinc-800 transition-colors duration-200">
                 Marketing Pipeline
               </Link>
               <Link to="/pipeline/new" 
-                className="sidebar-item text-sm py-1.5 text-primary">
+                className="flex items-center w-full text-sm py-1.5 px-2 rounded-md text-primary hover:text-primary hover:bg-zinc-800 transition-colors duration-200">
                 + Nieuwe Pipeline
               </Link>
             </div>
           </div>
           
-          <Link to="/messages" className={cn("sidebar-item", location.pathname === '/messages' && "active")}>
+          <Link to="/messages" className={cn(
+            "flex items-center gap-2 w-full text-sm px-3 py-2 rounded-md text-white/80 hover:text-white hover:bg-zinc-800 transition-colors duration-200",
+            location.pathname === '/messages' && "bg-zinc-800 text-white"
+          )}>
             <MessageSquare className="w-5 h-5" />
             <span className={cn("transition-opacity duration-200", collapsed ? "opacity-0 w-0" : "opacity-100")}>Berichten</span>
           </Link>
           
-          <Link to="/settings" className={cn("sidebar-item", location.pathname === '/settings' && "active")}>
+          <Link to="/settings" className={cn(
+            "flex items-center gap-2 w-full text-sm px-3 py-2 rounded-md text-white/80 hover:text-white hover:bg-zinc-800 transition-colors duration-200",
+            location.pathname === '/settings' && "bg-zinc-800 text-white"
+          )}>
             <Settings className="w-5 h-5" />
             <span className={cn("transition-opacity duration-200", collapsed ? "opacity-0 w-0" : "opacity-100")}>Instellingen</span>
           </Link>
@@ -98,7 +110,7 @@ const Sidebar = () => {
       </div>
       
       <div className={cn(
-        "p-4 border-t border-sidebar-border",
+        "p-4 border-t border-zinc-800",
         collapsed ? "flex justify-center" : ""
       )}>
         <div className={cn(
@@ -112,8 +124,8 @@ const Sidebar = () => {
             "ml-3 transition-opacity duration-200",
             collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
           )}>
-            <p className="text-sm font-medium text-sidebar-foreground">John Smith</p>
-            <p className="text-xs text-sidebar-foreground/70">john@example.com</p>
+            <p className="text-sm font-medium text-white">John Smith</p>
+            <p className="text-xs text-white/70">john@example.com</p>
           </div>
         </div>
       </div>

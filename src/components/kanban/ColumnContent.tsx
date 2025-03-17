@@ -32,8 +32,8 @@ const ColumnContent: React.FC<ColumnContentProps> = ({
   };
   
   return (
-    <div className="kanban-column-content">
-      <ScrollArea className="h-full">
+    <div className="kanban-column-content h-full">
+      <ScrollArea className="h-full max-h-[calc(5*112px)]">
         <div className="p-2 space-y-2">
           {leads.length === 0 ? (
             <div className="text-muted-foreground text-sm py-2 px-3 text-center">

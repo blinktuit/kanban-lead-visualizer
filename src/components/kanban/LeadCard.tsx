@@ -67,10 +67,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      {/* Checkbox - only visible when hovering or in selection mode */}
+      {/* Checkbox - only visible when hovering or when in selection mode */}
       <div className={cn(
         "absolute top-2 left-2 transition-opacity duration-150",
-        (selectionActive || isHovering) ? "opacity-100" : "opacity-0"
+        (isHovering || selectionActive) ? "opacity-100" : "opacity-0"
       )}>
         <Checkbox
           checked={selected}
@@ -79,7 +79,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         />
       </div>
 
-      <div className="flex items-start pl-2">
+      <div className="flex items-start pl-7">
         <div 
           className="w-10 h-10 rounded-full bg-muted flex-shrink-0 flex items-center justify-center overflow-hidden"
           style={{ opacity: isHovering ? 0.8 : 1 }}
@@ -103,20 +103,22 @@ const LeadCard: React.FC<LeadCardProps> = ({
           
           {settings.cardFields.showConnectionStatus && getStatusBadge()}
           
-          {settings.cardFields.showTags && displayTag && (
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              <span className={cn("tag", getTagClass(displayTag.color))}>
-                {displayTag.name}
-              </span>
-              {isHovering && (
+          {settings.cardFields.showTags && (
+            <div className="flex justify-between items-center mt-2">
+              <div className="flex items-center space-x-1">
+                {displayTag && (
+                  <span className={cn("tag", getTagClass(displayTag.color))}>
+                    {displayTag.name}
+                  </span>
+                )}
                 <button 
-                  className="tag tag-dashed"
+                  className="tag tag-dashed inline-flex"
                   onClick={() => onAddLabel?.(lead.id)}
                 >
                   <Plus className="h-2.5 w-2.5 mr-1" />
                   Label
                 </button>
-              )}
+              </div>
             </div>
           )}
         </div>

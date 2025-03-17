@@ -35,13 +35,13 @@
 
     --radius: 0.5rem;
 
-    --sidebar-background: 220 14% 12%;
+    --sidebar-background: 0 0% 13%; /* Changed to dark gray */
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 196 80% 42%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 219 14% 18%;
+    --sidebar-accent: 0 0% 18%; /* Adjusted to match */
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 220 13% 18%;
+    --sidebar-border: 0 0% 18%; /* Adjusted to match */
     --sidebar-ring: 196 80% 42%;
 
     --kanban-column: 210 40% 98%;
@@ -79,13 +79,13 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
     
-    --sidebar-background: 220 14% 12%;
+    --sidebar-background: 0 0% 13%; /* Dark gray sidebar */
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 196 80% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 219 14% 18%;
+    --sidebar-accent: 0 0% 18%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-border: 0 0% 18%;
     --sidebar-ring: 196 80% 42%;
 
     --kanban-column: 217 33% 17.5%;
@@ -117,6 +117,7 @@
            hover:shadow-md transition-all duration-200 ease-out-expo
            border border-zinc-200 dark:border-zinc-700 animate-fade-in;
     box-shadow: var(--kanban-card-shadow);
+    height: 100px; /* Fixed height for consistency */
   }
 
   .kanban-card:hover {
@@ -148,7 +149,6 @@
 
   .kanban-scrollable {
     @apply overflow-y-auto flex-grow pb-2 px-1 scrollbar-thin;
-    max-height: 70vh;
   }
 
   .kanban-menu-item {
@@ -180,6 +180,11 @@
     @apply bg-red-100 text-red-800;
   }
 
+  .tag-dashed {
+    @apply bg-transparent border border-dashed border-muted-foreground/50 text-muted-foreground px-2 py-0.5 rounded-full text-xs
+           hover:border-foreground hover:text-foreground transition-colors;
+  }
+
   .scrollbar-thin {
     scrollbar-width: thin;
   }
@@ -198,12 +203,11 @@
 
   .sidebar-item {
     @apply flex items-center gap-2 w-full text-sm px-3 py-2 rounded-md
-           text-sidebar-foreground/80 hover:text-sidebar-foreground 
-           hover:bg-sidebar-accent transition-colors duration-200;
+           text-white/80 hover:text-white hover:bg-zinc-800 transition-colors duration-200;
   }
 
   .sidebar-item.active {
-    @apply bg-sidebar-accent text-sidebar-foreground;
+    @apply bg-zinc-800 text-white;
   }
 
   .glass-card {
@@ -291,6 +295,7 @@ input[type="checkbox"], input[type="radio"] {
 .kanban-board-container {
   @apply h-full overflow-x-auto pb-6;
   min-height: calc(100vh - 180px);
+  max-height: calc(100vh - 120px);
 }
 
 /* Kanban flex container */
@@ -299,11 +304,8 @@ input[type="checkbox"], input[type="radio"] {
   min-height: 70vh;
 }
 
-/* Better styling for tag pills */
-.tag {
-  @apply text-xs inline-flex items-center px-2 py-0.5 rounded-full transition-colors;
-}
-
-.tag-selection {
-  @apply flex flex-wrap gap-1.5 mt-2;
+/* Column content area with fixed height cards */
+.kanban-column-content {
+  @apply flex-1 overflow-hidden;
+  max-height: calc(100vh - 250px);
 }

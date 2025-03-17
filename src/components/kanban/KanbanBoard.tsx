@@ -143,9 +143,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
   const allTags = getAllTags();
   
   return (
-    <div className="h-full flex flex-col">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border/40">
+    <div className="h-full flex flex-col max-w-full overflow-hidden">
+      {/* Top bar - fixed position to keep in view */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border/40 sticky top-0 bg-background z-10">
         <div className="flex items-center">
           <PipelineTitle 
             title={pipeline.name}
@@ -157,7 +157,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
           />
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 overflow-x-auto pb-2 whitespace-nowrap">
           <SearchLeads 
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -228,7 +228,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
           <AddColumn onAddColumn={handleAddColumn} />
 
           {/* Add Lead Button */}
-          <Button size="sm" onClick={() => setIsAddLeadOpen(true)}>
+          <Button size="sm" onClick={() => setIsAddLeadOpen(true)} className="whitespace-nowrap">
             <Plus className="h-4 w-4 mr-2" />
             Lead toevoegen
           </Button>
@@ -249,7 +249,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
       )}
       
       {/* Kanban board - using the horizontal scroll container */}
-      <div className={cn("kanban-board-container p-6", hasOverflow && "has-overflow")}>
+      <div className={cn("kanban-board-container p-6 overflow-auto", hasOverflow && "has-overflow")}>
         <div 
           className="kanban-flex-container"
           ref={scrollRef}

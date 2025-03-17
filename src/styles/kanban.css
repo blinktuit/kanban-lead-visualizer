@@ -28,7 +28,7 @@
 
 /* Horizontal scrolling container */
 .kanban-board-container {
-  overflow: hidden;
+  overflow-x: auto;
   width: 100%;
   position: relative;
 }
@@ -38,7 +38,7 @@
   gap: 16px;
   padding-bottom: 16px; /* Space for the scrollbar */
   overflow-x: auto;
-  min-height: calc(100vh - 150px);
+  min-height: calc(100vh - 180px);
   scrollbar-width: thin;
 }
 
@@ -102,9 +102,25 @@
   color: hsl(var(--muted-foreground));
   cursor: pointer;
   transition: all 0.2s;
+  margin-left: 4px;
 }
 
 .tag-dashed:hover {
   border-color: hsl(var(--foreground));
   color: hsl(var(--foreground));
+}
+
+/* Fix for horizontal scrolling */
+.max-w-full {
+  max-width: 100% !important;
+}
+
+.overflow-hidden {
+  overflow: hidden !important;
+}
+
+/* Fixed height for cards */
+.kanban-card {
+  height: 110px;
+  overflow: hidden;
 }
