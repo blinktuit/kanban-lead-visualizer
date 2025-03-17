@@ -4,6 +4,7 @@ import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { KanbanSettings } from '@/types';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface DisplaySettingsProps {
   settings: KanbanSettings;
@@ -24,76 +25,72 @@ const DisplaySettings: React.FC<DisplaySettingsProps> = ({ settings, setSettings
       <PopoverContent className="w-72">
         <div className="space-y-4">
           <h3 className="text-sm font-medium">Kaart velden</h3>
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <Checkbox
                 id="showJobTitle"
                 checked={settings.cardFields.showJobTitle}
-                onChange={(e) => {
+                onCheckedChange={(checked) => {
                   setSettings({
                     ...settings,
                     cardFields: {
                       ...settings.cardFields,
-                      showJobTitle: e.target.checked
+                      showJobTitle: checked === true
                     }
                   });
                 }}
-                className="mr-2"
+                className="modern-checkbox"
               />
               <label htmlFor="showJobTitle" className="text-sm">Toon functietitel</label>
             </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
+            <div className="flex items-center space-x-2">
+              <Checkbox
                 id="showCompany"
                 checked={settings.cardFields.showCompany}
-                onChange={(e) => {
+                onCheckedChange={(checked) => {
                   setSettings({
                     ...settings,
                     cardFields: {
                       ...settings.cardFields,
-                      showCompany: e.target.checked
+                      showCompany: checked === true
                     }
                   });
                 }}
-                className="mr-2"
+                className="modern-checkbox"
               />
               <label htmlFor="showCompany" className="text-sm">Toon bedrijf</label>
             </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
+            <div className="flex items-center space-x-2">
+              <Checkbox
                 id="showConnectionStatus"
                 checked={settings.cardFields.showConnectionStatus}
-                onChange={(e) => {
+                onCheckedChange={(checked) => {
                   setSettings({
                     ...settings,
                     cardFields: {
                       ...settings.cardFields,
-                      showConnectionStatus: e.target.checked
+                      showConnectionStatus: checked === true
                     }
                   });
                 }}
-                className="mr-2"
+                className="modern-checkbox"
               />
               <label htmlFor="showConnectionStatus" className="text-sm">Toon connectiestatus</label>
             </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
+            <div className="flex items-center space-x-2">
+              <Checkbox
                 id="showTags"
                 checked={settings.cardFields.showTags}
-                onChange={(e) => {
+                onCheckedChange={(checked) => {
                   setSettings({
                     ...settings,
                     cardFields: {
                       ...settings.cardFields,
-                      showTags: e.target.checked
+                      showTags: checked === true
                     }
                   });
                 }}
-                className="mr-2"
+                className="modern-checkbox"
               />
               <label htmlFor="showTags" className="text-sm">Toon tags</label>
             </div>

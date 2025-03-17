@@ -28,7 +28,7 @@ const ColumnContent: React.FC<ColumnContentProps> = ({
   
   return (
     <ScrollArea className="kanban-scrollable" type="hover">
-      <div className="pr-1">
+      <div className="pr-1 space-y-3">
         {leads.map(lead => (
           <LeadCardContainer 
             key={lead.id}

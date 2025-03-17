@@ -43,6 +43,11 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 220 13% 18%;
     --sidebar-ring: 196 80% 42%;
+
+    --kanban-column: 210 40% 98%;
+    --kanban-column-hover: 210 40% 96%;
+    --kanban-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --kanban-card-shadow-hover: 0 3px 6px rgba(0, 0, 0, 0.12);
   }
 
   .dark {
@@ -82,6 +87,11 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 196 80% 42%;
+
+    --kanban-column: 217 33% 17.5%;
+    --kanban-column-hover: 217 33% 22%;
+    --kanban-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    --kanban-card-shadow-hover: 0 3px 6px rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -103,18 +113,25 @@
 
 @layer components {
   .kanban-card {
-    @apply bg-white rounded-md p-4 shadow-card border border-border/50 mb-3 cursor-pointer 
-           transition-all duration-250 ease-out-expo hover:shadow-card-hover 
-           hover:border-primary/30 animate-fade-in;
+    @apply bg-white dark:bg-zinc-800 rounded-md p-4 mb-3 cursor-pointer 
+           hover:shadow-md transition-all duration-200 ease-out-expo
+           border border-zinc-200 dark:border-zinc-700 animate-fade-in;
+    box-shadow: var(--kanban-card-shadow);
+  }
+
+  .kanban-card:hover {
+    @apply border-primary/40;
+    box-shadow: var(--kanban-card-shadow-hover);
   }
 
   .kanban-card.selected {
-    @apply border-primary/50 bg-primary/5 shadow-md;
+    @apply border-primary/70 bg-primary/5 shadow-md;
   }
 
   .kanban-column {
-    @apply bg-kanban-column rounded-lg p-3 flex-shrink-0 flex flex-col min-w-[280px] max-w-[280px] h-full
-           border border-border/50 shadow-column transition-colors duration-200;
+    @apply rounded-lg p-3 flex-shrink-0 flex flex-col min-w-[280px] max-w-[280px] h-full
+           border border-zinc-200 dark:border-zinc-700 transition-colors duration-200;
+    background-color: hsl(var(--kanban-column));
   }
 
   .kanban-column-header {
@@ -130,7 +147,8 @@
   }
 
   .kanban-scrollable {
-    @apply overflow-y-auto flex-grow pb-2 px-1 max-h-[calc(100vh-180px)];
+    @apply overflow-y-auto flex-grow pb-2 px-1 scrollbar-thin;
+    max-height: 70vh;
   }
 
   .kanban-menu-item {
@@ -211,6 +229,23 @@
   .sidebar-dropdown.open {
     height: auto;
   }
+
+  /* Modern checkbox styling */
+  .modern-checkbox {
+    @apply h-4 w-4 rounded-sm bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-600
+           checked:bg-primary checked:border-primary focus:ring-1 focus:ring-primary/30
+           transition-colors duration-150;
+  }
+
+  /* Multi-card drag indicator */
+  .multi-card-drag {
+    @apply fixed rounded-md bg-white shadow-md border border-primary/30 px-2 py-1.5 z-50 pointer-events-none;
+  }
+
+  /* Column handle styling */
+  .column-handle {
+    @apply cursor-move text-muted-foreground hover:text-primary transition-colors;
+  }
 }
 
 /* Custom scrollbar for the whole kanban board horizontal scrolling */
@@ -228,7 +263,7 @@
 
 /* Improved styling for checkboxes and buttons */
 input[type="checkbox"], input[type="radio"] {
-  @apply text-primary border-primary/60 rounded focus:ring-primary/20;
+  @apply text-primary border-primary/50 rounded focus:ring-1 focus:ring-primary/30;
 }
 
 .checkbox-modern {
@@ -244,7 +279,7 @@ input[type="checkbox"], input[type="radio"] {
 
 /* Style for column drag indicator */
 .column-drag-indicator {
-  @apply border-2 border-dashed border-primary/40 rounded-lg bg-primary/5;
+  @apply border-2 border-dashed border-primary/50 rounded-lg bg-primary/5;
 }
 
 /* Style for the column handle */
@@ -252,10 +287,16 @@ input[type="checkbox"], input[type="radio"] {
   @apply cursor-move text-muted-foreground hover:text-foreground transition-colors;
 }
 
-/* Advanced styling for modern UI elements */
-.kanban-card {
-  @apply shadow-sm hover:shadow-md;
-  backdrop-filter: blur(8px);
+/* Kanban board container */
+.kanban-board-container {
+  @apply h-full overflow-x-auto pb-6;
+  min-height: calc(100vh - 180px);
+}
+
+/* Kanban flex container */
+.kanban-flex-container {
+  @apply flex space-x-4 h-full;
+  min-height: 70vh;
 }
 
 /* Better styling for tag pills */

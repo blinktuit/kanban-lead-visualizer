@@ -14,7 +14,6 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Lead, Tag } from '@/types';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface KanbanBoardProps {
   pipelineId: string;
@@ -192,9 +191,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
         />
       )}
       
-      {/* Kanban board */}
-      <div className="flex-1 overflow-x-auto p-6">
-        <div className="flex space-x-4 h-full min-h-[500px]">
+      {/* Kanban board - using the new container classes */}
+      <div className="kanban-board-container p-6">
+        <div className="kanban-flex-container">
           {pipeline.columns
             .sort((a, b) => a.order - b.order)
             .map(column => (

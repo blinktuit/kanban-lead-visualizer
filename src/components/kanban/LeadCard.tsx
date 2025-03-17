@@ -63,14 +63,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
+      {/* Checkbox - only visible when hovering or in selection mode */}
       <div className={cn(
-        "absolute top-2 left-2 transition-opacity",
-        selectionActive || isHovering ? "opacity-100" : "opacity-0"
+        "absolute top-2 left-2 transition-opacity duration-150",
+        (selectionActive || isHovering) ? "opacity-100" : "opacity-0"
       )}>
         <Checkbox
           checked={selected}
           onCheckedChange={() => onSelect(lead.id)}
-          className="h-4 w-4"
+          className="modern-checkbox"
         />
       </div>
 
