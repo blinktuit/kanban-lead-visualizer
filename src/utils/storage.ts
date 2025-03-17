@@ -126,7 +126,7 @@ export const getPipelines = (): Pipeline[] => {
 };
 
 // Get a specific pipeline by ID
-export const const getPipeline = (id: string): Pipeline | undefined => {
+export const getPipeline = (id: string): Pipeline | undefined => {
   const pipelines = getPipelines();
   return pipelines.find(p => p.id === id);
 };
