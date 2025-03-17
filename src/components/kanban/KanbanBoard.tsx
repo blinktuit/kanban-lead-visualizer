@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Column from './Column';
 import PipelineTitle from './PipelineTitle';
@@ -19,7 +18,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Input } from '@/components/ui/input';
 import { Lead, Tag } from '@/types';
 import { cn } from '@/lib/utils';
-import '../styles/kanban.css';
+import '@/styles/kanban.css';
 
 interface KanbanBoardProps {
   pipelineId: string;

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { MoreHorizontal, MessageSquare, Tag, ArrowRight, ListPlus, RefreshCw } from 'lucide-react';
+import { MoreHorizontal, MessageSquare, Tag, ArrowRight, ListPlus, RefreshCw, Plus } from 'lucide-react';
 import { Lead, Tag as TagType, KanbanSettings } from '@/types';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
