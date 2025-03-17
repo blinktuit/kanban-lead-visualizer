@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Lead, KanbanSettings } from '@/types';
-import LeadCardContainer from './LeadCardContainer';
+import LeadCard from './LeadCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ColumnContentProps {
@@ -12,6 +12,8 @@ interface ColumnContentProps {
   draggedLeadId: string | null;
   onDragStart: (e: React.DragEvent, leadId: string) => void;
   onDragEnd: () => void;
+  onAddLabel?: (leadId: string) => void;
+  onAddToPipeline?: (leadId: string) => void;
 }
 
 const ColumnContent: React.FC<ColumnContentProps> = ({
@@ -21,30 +23,47 @@ const ColumnContent: React.FC<ColumnContentProps> = ({
   selectedLeads,
   draggedLeadId,
   onDragStart,
-  onDragEnd
+  onDragEnd,
+  onAddLabel,
+  onAddToPipeline
 }) => {
-  // Determine if selection mode is active
-  const selectionActive = selectedLeads.size > 0;
+  const handleLeadSelect = (leadId: string) => {
+    onSelectLead(leadId, !selectedLeads.has(leadId));
+  };
   
   return (
-    <ScrollArea className="kanban-scrollable" type="hover">
-      <div className="pr-1 space-y-3">
-        {leads.map(lead => (
-          <LeadCardContainer 
-            key={lead.id}
-            lead={lead}
-            settings={settings}
-            onSelectLead={onSelectLead}
-            isSelected={selectedLeads.has(lead.id)}
-            isDragging={draggedLeadId === lead.id}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-            selectionActive={selectionActive}
-            selectedCount={selectedLeads.size}
-          />
-        ))}
-      </div>
-    </ScrollArea>
+    <div className="kanban-column-content">
+      <ScrollArea className="h-full">
+        <div className="p-2 space-y-2">
+          {leads.length === 0 ? (
+            <div className="text-muted-foreground text-sm py-2 px-3 text-center">
+              Geen leads in deze kolom
+            </div>
+          ) : (
+            leads.map(lead => (
+              <div
+                key={lead.id}
+                draggable
+                onDragStart={(e) => onDragStart(e, lead.id)}
+                onDragEnd={onDragEnd}
+                className="cursor-grab active:cursor-grabbing"
+              >
+                <LeadCard
+                  lead={lead}
+                  settings={settings}
+                  onSelect={handleLeadSelect}
+                  selected={selectedLeads.has(lead.id)}
+                  isDragging={draggedLeadId === lead.id}
+                  selectionActive={selectedLeads.size > 0}
+                  onAddLabel={onAddLabel}
+                  onAddToPipeline={onAddToPipeline}
+                />
+              </div>
+            ))
+          )}
+        </div>
+      </ScrollArea>
+    </div>
   );
 };
 

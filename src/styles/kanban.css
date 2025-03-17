@@ -1,0 +1,110 @@
+
+/* Column drop indicator styles */
+.column-drop-indicator {
+  position: relative;
+}
+
+.column-drop-indicator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -8px;
+  width: 4px;
+  background-color: hsl(var(--primary));
+  border-radius: 2px;
+}
+
+.column-drop-indicator::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -8px;
+  width: 4px;
+  background-color: hsl(var(--primary));
+  border-radius: 2px;
+}
+
+/* Horizontal scrolling container */
+.kanban-board-container {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+}
+
+.kanban-flex-container {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 16px; /* Space for the scrollbar */
+  overflow-x: auto;
+  min-height: calc(100vh - 150px);
+  scrollbar-width: thin;
+}
+
+/* Scroll indicator */
+.kanban-board-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(to right, transparent, rgba(var(--background), 0.8) 70%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 10;
+}
+
+.kanban-board-container.has-overflow::after {
+  opacity: 1;
+}
+
+/* Tag styles */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+.tag-blue {
+  background-color: rgb(219, 234, 254);
+  color: rgb(37, 99, 235);
+}
+
+.tag-green {
+  background-color: rgb(220, 252, 231);
+  color: rgb(22, 163, 74);
+}
+
+.tag-purple {
+  background-color: rgb(237, 233, 254);
+  color: rgb(126, 34, 206);
+}
+
+.tag-amber {
+  background-color: rgb(254, 243, 199);
+  color: rgb(217, 119, 6);
+}
+
+.tag-red {
+  background-color: rgb(254, 226, 226);
+  color: rgb(220, 38, 38);
+}
+
+.tag-dashed {
+  background-color: transparent;
+  border: 1px dashed hsl(var(--muted-foreground));
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tag-dashed:hover {
+  border-color: hsl(var(--foreground));
+  color: hsl(var(--foreground));
+}

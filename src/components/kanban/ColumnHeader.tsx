@@ -30,6 +30,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import InlineColumnRename from './InlineColumnRename';
 
 interface ColumnHeaderProps {
   name: string;
@@ -62,15 +63,14 @@ const ColumnHeader: React.FC<ColumnHeaderProps> = ({
 }) => {
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [newName, setNewName] = useState(name);
+  const [isEditing, setIsEditing] = useState(false);
   const [deleteOption, setDeleteOption] = useState<'delete' | 'move' | 'add'>('delete');
   const [targetColumnId, setTargetColumnId] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const handleRef = useRef<HTMLDivElement>(null);
   
-  const handleRename = () => {
-    onRename(newName);
-    setIsRenameOpen(false);
+  const handleRenameComplete = () => {
+    setIsEditing(false);
   };
   
   const handleDeleteConfirm = () => {
@@ -107,11 +107,18 @@ const ColumnHeader: React.FC<ColumnHeaderProps> = ({
         <div className="flex items-center cursor-move mr-2" ref={handleRef}>
           <Grip className="h-4 w-4 text-muted-foreground" />
         </div>
-        <h3 className="kanban-title">{name}</h3>
-        <span className="kanban-count">{count}</span>
-        <div className="ml-1">
+        
+        {/* We now integrate selection with column count */}
+        <div className="flex items-center" onClick={onSelectAll}>
+          <InlineColumnRename 
+            name={name}
+            count={count}
+            isEditing={isEditing}
+            onRename={onRename}
+            onEditingComplete={handleRenameComplete}
+          />
           <Checkbox 
-            className="h-3.5 w-3.5 data-[state=checked]:bg-primary/70 data-[state=checked]:text-primary-foreground border-muted-foreground/50"
+            className="h-3.5 w-3.5 ml-1 data-[state=checked]:bg-primary/70 data-[state=checked]:text-primary-foreground border-muted-foreground/50"
             checked={allSelected && count > 0}
             onCheckedChange={onSelectAll}
           />
@@ -119,13 +126,6 @@ const ColumnHeader: React.FC<ColumnHeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-1">
-        <button 
-          className="text-muted-foreground hover:text-foreground p-0.5 rounded text-xs"
-          onClick={onAddLabel}
-        >
-          + Label
-        </button>
-        
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="text-muted-foreground hover:text-foreground p-0.5 rounded">
@@ -135,70 +135,52 @@ const ColumnHeader: React.FC<ColumnHeaderProps> = ({
           <DropdownMenuContent className="w-48" align="end">
             <DropdownMenuItem 
               className="kanban-menu-item"
-              onClick={() => setIsRenameOpen(true)}
+              onClick={() => setIsEditing(true)}
             >
               <Pencil className="h-4 w-4" />
-              <span>Rename column</span>
+              <span>Kolom hernoemen</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               className="kanban-menu-item" 
               onClick={() => setIsDeleteOpen(true)}
             >
               <Trash2 className="h-4 w-4" />
-              <span>Delete column</span>
+              <span>Kolom verwijderen</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="kanban-menu-item">
               <Download className="h-4 w-4" />
-              <span>Export to CSV</span>
+              <span>Exporteren naar CSV</span>
             </DropdownMenuItem>
             <DropdownMenuItem className="kanban-menu-item">
               <Plus className="h-4 w-4" />
-              <span>Add leads</span>
+              <span>Leads toevoegen</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="kanban-menu-item">
+            <DropdownMenuItem
+              className="kanban-menu-item"
+              onClick={onAddLabel}
+            >
               <Tag className="h-4 w-4" />
-              <span>Apply tag to all</span>
+              <span>Label toevoegen</span>
             </DropdownMenuItem>
             <DropdownMenuItem 
               className="kanban-menu-item"
               onClick={onSelectAll}
             >
               <CheckSquare className="h-4 w-4" />
-              <span>Select all leads</span>
+              <span>Alle leads selecteren</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
       
-      {/* Rename Dialog */}
-      <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Rename column</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <Input
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="Column name"
-              className="w-full"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsRenameOpen(false)}>Cancel</Button>
-            <Button onClick={handleRename}>Save</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent className="sm:max-w-[500px]">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete column</AlertDialogTitle>
+            <AlertDialogTitle>Kolom verwijderen</AlertDialogTitle>
             <AlertDialogDescription>
-              What would you like to do with the leads in this column?
+              Wat wil je doen met de leads in deze kolom?
             </AlertDialogDescription>
           </AlertDialogHeader>
           
@@ -212,7 +194,7 @@ const ColumnHeader: React.FC<ColumnHeaderProps> = ({
                 checked={deleteOption === 'delete'}
                 onChange={() => setDeleteOption('delete')}
               />
-              <label htmlFor="delete-leads">Remove leads from this pipeline</label>
+              <label htmlFor="delete-leads">Leads uit deze pipeline verwijderen</label>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -224,7 +206,7 @@ const ColumnHeader: React.FC<ColumnHeaderProps> = ({
                 checked={deleteOption === 'move'}
                 onChange={() => setDeleteOption('move')}
               />
-              <label htmlFor="move-leads">Move leads to another column</label>
+              <label htmlFor="move-leads">Leads naar een andere kolom verplaatsen</label>
             </div>
             
             {deleteOption === 'move' && (
@@ -234,7 +216,7 @@ const ColumnHeader: React.FC<ColumnHeaderProps> = ({
                   onValueChange={setTargetColumnId}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select column" />
+                    <SelectValue placeholder="Selecteer kolom" />
                   </SelectTrigger>
                   <SelectContent>
                     {columns
@@ -259,17 +241,17 @@ const ColumnHeader: React.FC<ColumnHeaderProps> = ({
                 checked={deleteOption === 'add'}
                 onChange={() => setDeleteOption('add')}
               />
-              <label htmlFor="add-other-pipeline">Add leads to another pipeline</label>
+              <label htmlFor="add-other-pipeline">Leads toevoegen aan andere pipeline</label>
             </div>
           </div>
           
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setIsDeleteOpen(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setIsDeleteOpen(false)}>Annuleren</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteConfirm}
               disabled={deleteOption === 'move' && !targetColumnId}
             >
-              Delete Column
+              Kolom verwijderen
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

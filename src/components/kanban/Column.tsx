@@ -4,6 +4,7 @@ import { Column as ColumnType, Lead, KanbanSettings } from '@/types';
 import ColumnHeader from './ColumnHeader';
 import ColumnDragLayer from './ColumnDragLayer';
 import ColumnContent from './ColumnContent';
+import ColumnFooter from './ColumnFooter';
 import { useColumn } from '@/hooks/useColumn';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
@@ -23,6 +24,9 @@ interface ColumnProps {
   onMoveColumn: (columnId: string, newIndex: number) => void;
   onDeleteWithOptions: (columnId: string, option: 'delete' | 'move' | 'add', targetColumnId?: string, targetPipelineId?: string) => void;
   onAddLabelToColumn: (columnId: string) => void;
+  onAddLabelToLead?: (leadId: string) => void;
+  onAddLeadToPipeline?: (leadId: string) => void;
+  onAddLead?: (columnId: string) => void;
 }
 
 const Column: React.FC<ColumnProps> = ({ 
@@ -39,7 +43,10 @@ const Column: React.FC<ColumnProps> = ({
   pipelineId,
   onMoveColumn,
   onDeleteWithOptions,
-  onAddLabelToColumn
+  onAddLabelToColumn,
+  onAddLabelToLead,
+  onAddLeadToPipeline,
+  onAddLead
 }) => {
   const { toast } = useToast();
   const {
@@ -163,6 +170,13 @@ const Column: React.FC<ColumnProps> = ({
         draggedLeadId={draggedLeadId}
         onDragStart={handleLeadDragStart}
         onDragEnd={handleDragEnd}
+        onAddLabel={onAddLabelToLead}
+        onAddToPipeline={onAddLeadToPipeline}
+      />
+      
+      <ColumnFooter 
+        columnId={column.id}
+        onAddLead={onAddLead || (() => {})}
       />
     </ColumnDragLayer>
   );

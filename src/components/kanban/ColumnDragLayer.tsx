@@ -26,7 +26,18 @@ const ColumnDragLayer: React.FC<ColumnDragLayerProps> = ({
   columnId
 }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [isColumnDrop, setIsColumnDrop] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  // Check if the dragged item is a column (not a lead)
+  const handleDragOver = (e: React.DragEvent) => {
+    // Check if a column is being dragged (check dataTransfer)
+    const isColumn = e.dataTransfer.types.includes('column-id');
+    setIsColumnDrop(isColumn);
+    
+    // Call the original drag over handler
+    onDragOver(e);
+  };
 
   // Handle column drag start
   const handleDragStart = (e: React.DragEvent) => {
@@ -58,6 +69,7 @@ const ColumnDragLayer: React.FC<ColumnDragLayerProps> = ({
   const handleDragEnd = () => {
     if (onDragEnd) {
       setIsDragging(false);
+      setIsColumnDrop(false);
       onDragEnd();
     }
   };
@@ -67,10 +79,12 @@ const ColumnDragLayer: React.FC<ColumnDragLayerProps> = ({
       ref={ref}
       className={cn(
         "kanban-column", 
-        isDragOver && "border-primary/70 bg-kanban-column-hover",
+        isDragOver && "border-primary/70",
+        isDragOver && isColumnDrop ? "column-drop-indicator" : "",
+        isDragOver && !isColumnDrop ? "bg-kanban-column-hover" : "",
         isDragging && "opacity-50 border-primary/50"
       )}
-      onDragOver={onDragOver}
+      onDragOver={handleDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
       draggable={draggable}

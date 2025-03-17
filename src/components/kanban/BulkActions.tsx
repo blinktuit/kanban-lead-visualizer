@@ -9,25 +9,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Column } from '@/types';
+import { Column, Pipeline } from '@/types';
+import PipelineSelector from './PipelineSelector';
 
 interface BulkActionsProps {
   selectedCount: number;
   columns: Column[];
+  pipelines?: Pipeline[];
   onMoveLeads: (leadIds: string[], targetColumnId: string) => void;
   selectedLeads: Set<string>;
   onClearSelection: () => void;
+  onAddToPipelines?: (leadIds: string[], pipelineIds: string[]) => void;
+  onCreateNewPipeline?: (name: string) => void;
 }
 
 const BulkActions: React.FC<BulkActionsProps> = ({
   selectedCount,
   columns,
+  pipelines = [],
   onMoveLeads,
   selectedLeads,
   onClearSelection,
+  onAddToPipelines,
+  onCreateNewPipeline,
 }) => {
   const [isMoveBulkOpen, setIsMoveBulkOpen] = useState(false);
+  const [isPipelineSelectorOpen, setIsPipelineSelectorOpen] = useState(false);
   const [targetColumnId, setTargetColumnId] = useState('');
+  const [selectedPipelines, setSelectedPipelines] = useState<string[]>([]);
   
   const handleBulkMove = () => {
     if (!targetColumnId) return;
@@ -38,6 +47,18 @@ const BulkActions: React.FC<BulkActionsProps> = ({
     // Reset selections and UI state
     setIsMoveBulkOpen(false);
     setTargetColumnId('');
+  };
+
+  const handlePipelineChange = (pipelineIds: string[]) => {
+    setSelectedPipelines(pipelineIds);
+  };
+
+  const handleAddToPipelines = () => {
+    if (selectedPipelines.length > 0 && onAddToPipelines) {
+      onAddToPipelines(Array.from(selectedLeads), selectedPipelines);
+      setSelectedPipelines([]);
+      setIsPipelineSelectorOpen(false);
+    }
   };
   
   return (
@@ -77,8 +98,38 @@ const BulkActions: React.FC<BulkActionsProps> = ({
             </div>
           </PopoverContent>
         </Popover>
-        <Button size="sm" variant="outline">Tag toevoegen</Button>
-        <Button size="sm" variant="outline">Toevoegen aan pipeline</Button>
+        
+        <Button size="sm" variant="outline">
+          Label toevoegen
+        </Button>
+        
+        <Popover open={isPipelineSelectorOpen} onOpenChange={setIsPipelineSelectorOpen}>
+          <PopoverTrigger asChild>
+            <Button size="sm" variant="outline">
+              Toevoegen aan pipeline
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="p-0" align="end">
+            <div className="w-full">
+              <PipelineSelector
+                pipelines={pipelines}
+                selectedPipelines={selectedPipelines}
+                onPipelineChange={handlePipelineChange}
+                onCreateNewPipeline={onCreateNewPipeline}
+                onClose={() => setIsPipelineSelectorOpen(false)}
+              />
+              
+              {selectedPipelines.length > 0 && (
+                <div className="p-3 pt-0 flex justify-end">
+                  <Button size="sm" onClick={handleAddToPipelines}>
+                    Toevoegen aan {selectedPipelines.length} pipeline{selectedPipelines.length > 1 ? 's' : ''}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
+        
         <Button size="sm" variant="outline">Exporteren</Button>
         <Button 
           size="sm" 

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Column from './Column';
 import PipelineTitle from './PipelineTitle';
 import SearchLeads from './SearchLeads';
@@ -7,13 +7,19 @@ import DisplaySettings from './DisplaySettings';
 import ShareExport from './ShareExport';
 import AddColumn from './AddColumn';
 import BulkActions from './BulkActions';
+import LabelPopover from './LabelPopover';
+import PipelineSelector from './PipelineSelector';
 import { useKanbanBoard } from '@/hooks/useKanbanBoard';
+import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
+import { useLeadLabelOperations } from '@/hooks/kanban/useLeadLabelOperations';
 import { Button } from '@/components/ui/button';
 import { Plus, Filter } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Lead, Tag } from '@/types';
+import { cn } from '@/lib/utils';
+import '../styles/kanban.css';
 
 interface KanbanBoardProps {
   pipelineId: string;
@@ -30,6 +36,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
 
   const {
     pipeline,
+    pipelines,
     leads,
     settings,
     searchTerm,
@@ -59,22 +66,31 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
     handleAddLabelToColumn
   } = useKanbanBoard(pipelineId);
   
-  if (!pipeline || !settings) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-pulse text-primary">Laden...</div>
-      </div>
-    );
-  }
-
-  // Get all unique tags from all leads
-  const allTags = Array.from(
-    new Map(
-      leads
-        .flatMap(lead => lead.tags)
-        .map(tag => [tag.id, tag])
-    ).values()
-  );
+  const { scrollRef, hasOverflow } = useHorizontalScroll<HTMLDivElement>();
+  
+  const {
+    isLabelPopoverOpen,
+    setIsLabelPopoverOpen,
+    activeLabelTarget,
+    selectedLabelIds,
+    getAllTags,
+    openLabelPopover,
+    closeLabelPopover,
+    handleLabelChange
+  } = useLeadLabelOperations(leads, (newLeads) => {
+    // This would update all leads, but we're only updating the tags
+  });
+  
+  const [isPipelineSelectorOpen, setIsPipelineSelectorOpen] = useState(false);
+  const [activePipelineTarget, setActivePipelineTarget] = useState<string | null>(null);
+  const [selectedPipelines, setSelectedPipelines] = useState<string[]>([]);
+  
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (container) {
+      container.classList.toggle('has-overflow', hasOverflow);
+    }
+  }, [hasOverflow, scrollRef]);
   
   const handleAddLeadSubmit = () => {
     handleAddLead(newLeadData);
@@ -86,6 +102,46 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
       tags: []
     });
   };
+  
+  const handleAddLeadToColumn = (columnId: string) => {
+    // Pre-select the column and open the add lead dialog
+    const columnLeadData = {
+      ...newLeadData,
+      pipelinePositions: { [pipelineId]: columnId }
+    };
+    setNewLeadData(columnLeadData);
+    setIsAddLeadOpen(true);
+  };
+  
+  const handleAddLeadToLabel = (leadId: string) => {
+    openLabelPopover(leadId, 'lead');
+  };
+  
+  const handleAddLeadToPipeline = (leadId: string) => {
+    setActivePipelineTarget(leadId);
+    setSelectedPipelines([]);
+    setIsPipelineSelectorOpen(true);
+  };
+  
+  const handleAddToPipelines = (leadIds: string[], pipelineIds: string[]) => {
+    // This would normally update backend/localStorage
+    // For demo, just show a toast
+    console.log(`Adding ${leadIds.length} leads to ${pipelineIds.length} pipelines`);
+    setIsPipelineSelectorOpen(false);
+    setActivePipelineTarget(null);
+    setSelectedPipelines([]);
+  };
+  
+  if (!pipeline || !settings) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-pulse text-primary">Laden...</div>
+      </div>
+    );
+  }
+
+  // Get all unique tags from all leads
+  const allTags = getAllTags();
   
   return (
     <div className="h-full flex flex-col">
@@ -185,15 +241,20 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
         <BulkActions 
           selectedCount={selectedLeads.size}
           columns={pipeline.columns}
+          pipelines={pipelines}
           onMoveLeads={handleMoveCards}
           selectedLeads={selectedLeads}
           onClearSelection={handleClearSelection}
+          onAddToPipelines={handleAddToPipelines}
         />
       )}
       
-      {/* Kanban board - using the new container classes */}
-      <div className="kanban-board-container p-6">
-        <div className="kanban-flex-container">
+      {/* Kanban board - using the horizontal scroll container */}
+      <div className={cn("kanban-board-container p-6", hasOverflow && "has-overflow")}>
+        <div 
+          className="kanban-flex-container"
+          ref={scrollRef}
+        >
           {pipeline.columns
             .sort((a, b) => a.order - b.order)
             .map(column => (
@@ -212,7 +273,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
                 pipelineId={pipelineId}
                 onMoveColumn={handleMoveColumn}
                 onDeleteWithOptions={handleDeleteColumnWithOptions}
-                onAddLabelToColumn={handleAddLabelToColumn}
+                onAddLabelToColumn={(columnId) => openLabelPopover(`${pipelineId}:${columnId}`, 'column')}
+                onAddLabelToLead={handleAddLeadToLabel}
+                onAddLeadToPipeline={handleAddLeadToPipeline}
+                onAddLead={handleAddLeadToColumn}
               />
             ))}
         </div>
@@ -254,11 +318,58 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddLeadOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsAddLeadOpen(false)}>Annuleren</Button>
             <Button onClick={handleAddLeadSubmit}>Lead toevoegen</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Label Popover */}
+      {isLabelPopoverOpen && activeLabelTarget && (
+        <div className="fixed z-50" style={{
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)'
+        }}>
+          <LabelPopover
+            availableTags={allTags}
+            selectedTags={selectedLabelIds}
+            onTagsChange={handleLabelChange}
+            onClose={closeLabelPopover}
+            canCreateNew
+          />
+        </div>
+      )}
+      
+      {/* Pipeline Selector */}
+      {isPipelineSelectorOpen && activePipelineTarget && (
+        <div className="fixed z-50" style={{
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)'
+        }}>
+          <PipelineSelector
+            pipelines={pipelines}
+            selectedPipelines={selectedPipelines}
+            onPipelineChange={setSelectedPipelines}
+            onCreateNewPipeline={(name) => console.log('Create new pipeline:', name)}
+            onClose={() => {
+              setIsPipelineSelectorOpen(false);
+              setActivePipelineTarget(null);
+            }}
+          />
+          
+          {selectedPipelines.length > 0 && (
+            <div className="bg-background p-3 border-t mt-2 flex justify-end rounded-b-md border-x border-b shadow-md">
+              <Button size="sm" onClick={() => {
+                handleAddToPipelines([activePipelineTarget], selectedPipelines);
+              }}>
+                Toevoegen aan {selectedPipelines.length} pipeline{selectedPipelines.length > 1 ? 's' : ''}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -13,6 +13,8 @@ interface LeadCardProps {
   selected: boolean;
   isDragging?: boolean;
   selectionActive: boolean;
+  onAddLabel?: (leadId: string) => void;
+  onAddToPipeline?: (leadId: string) => void;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({ 
@@ -21,7 +23,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
   onSelect,
   selected,
   isDragging = false,
-  selectionActive = false
+  selectionActive = false,
+  onAddLabel,
+  onAddToPipeline
 }) => {
   const [isHovering, setIsHovering] = useState(false);
   
@@ -75,7 +79,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         />
       </div>
 
-      <div className="flex items-start pl-6">
+      <div className="flex items-start pl-2">
         <div 
           className="w-10 h-10 rounded-full bg-muted flex-shrink-0 flex items-center justify-center overflow-hidden"
           style={{ opacity: isHovering ? 0.8 : 1 }}
@@ -104,6 +108,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
               <span className={cn("tag", getTagClass(displayTag.color))}>
                 {displayTag.name}
               </span>
+              {isHovering && (
+                <button 
+                  className="tag tag-dashed"
+                  onClick={() => onAddLabel?.(lead.id)}
+                >
+                  <Plus className="h-2.5 w-2.5 mr-1" />
+                  Label
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -121,15 +134,21 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   <MessageSquare className="h-4 w-4" />
                   <span>Notitie toevoegen</span>
                 </button>
-                <button className="kanban-menu-item">
+                <button 
+                  className="kanban-menu-item"
+                  onClick={() => onAddLabel?.(lead.id)}
+                >
                   <Tag className="h-4 w-4" />
-                  <span>Tag toevoegen</span>
+                  <span>Label toevoegen</span>
                 </button>
                 <button className="kanban-menu-item">
                   <ArrowRight className="h-4 w-4" />
                   <span>Verplaatsen</span>
                 </button>
-                <button className="kanban-menu-item">
+                <button 
+                  className="kanban-menu-item"
+                  onClick={() => onAddToPipeline?.(lead.id)}
+                >
                   <ListPlus className="h-4 w-4" />
                   <span>Aan pipeline toevoegen</span>
                 </button>
