@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface ColumnDragLayerProps {
   isDragOver: boolean;
@@ -7,6 +8,10 @@ interface ColumnDragLayerProps {
   onDragLeave: () => void;
   onDrop: (e: React.DragEvent) => void;
   children: React.ReactNode;
+  draggable?: boolean;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragEnd?: () => void;
+  columnId: string;
 }
 
 const ColumnDragLayer: React.FC<ColumnDragLayerProps> = ({
@@ -14,14 +19,25 @@ const ColumnDragLayer: React.FC<ColumnDragLayerProps> = ({
   onDragOver,
   onDragLeave,
   onDrop,
-  children
+  children,
+  draggable = false,
+  onDragStart,
+  onDragEnd,
+  columnId
 }) => {
   return (
     <div 
-      className={`kanban-column ${isDragOver ? "border-primary/50 bg-kanban-columnHover" : ""}`}
+      className={cn(
+        "kanban-column", 
+        isDragOver && "border-primary/50 bg-kanban-columnHover"
+      )}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      data-column-id={columnId}
     >
       {children}
     </div>

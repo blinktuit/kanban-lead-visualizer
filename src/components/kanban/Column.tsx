@@ -1,10 +1,12 @@
-import React from 'react';
+
+import React, { useMemo } from 'react';
 import { Column as ColumnType, Lead, KanbanSettings } from '@/types';
 import ColumnHeader from './ColumnHeader';
 import ColumnDragLayer from './ColumnDragLayer';
 import ColumnContent from './ColumnContent';
 import { useColumn } from '@/hooks/useColumn';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/use-toast';
 
 interface ColumnProps {
   column: ColumnType;
@@ -16,6 +18,11 @@ interface ColumnProps {
   onSelectLead: (leadId: string, selected: boolean) => void;
   selectedLeads: Set<string>;
   onSelectAllInColumn: (columnId: string) => void;
+  columns: ColumnType[];
+  pipelineId: string;
+  onMoveColumn: (columnId: string, newIndex: number) => void;
+  onDeleteWithOptions: (columnId: string, option: 'delete' | 'move' | 'add', targetColumnId?: string, targetPipelineId?: string) => void;
+  onAddLabelToColumn: (columnId: string) => void;
 }
 
 const Column: React.FC<ColumnProps> = ({ 
@@ -27,8 +34,14 @@ const Column: React.FC<ColumnProps> = ({
   onMoveCard,
   onSelectLead,
   selectedLeads,
-  onSelectAllInColumn
+  onSelectAllInColumn,
+  columns,
+  pipelineId,
+  onMoveColumn,
+  onDeleteWithOptions,
+  onAddLabelToColumn
 }) => {
+  const { toast } = useToast();
   const {
     isDragOver,
     draggedLeadId,
@@ -42,6 +55,20 @@ const Column: React.FC<ColumnProps> = ({
     e.preventDefault();
     handleDragLeave();
     
+    // Check if this is a column being dropped
+    const columnId = e.dataTransfer.getData('column-id');
+    if (columnId) {
+      const dropColumnId = column.id;
+      const dragColumnOrder = columns.find(c => c.id === columnId)?.order;
+      const dropColumnOrder = column.order;
+      
+      if (dragColumnOrder !== undefined && dropColumnOrder !== dragColumnOrder) {
+        onMoveColumn(columnId, dropColumnOrder);
+        return;
+      }
+    }
+    
+    // Handle lead cards being dropped
     const data = e.dataTransfer.getData('text/plain');
     
     try {
@@ -81,6 +108,28 @@ const Column: React.FC<ColumnProps> = ({
   const handleLeadDragStart = (e: React.DragEvent, leadId: string) => {
     handleDragStart(e, leadId, selectedLeads, onSelectLead);
   };
+
+  const handleColumnDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData('column-id', column.id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleColumnDragEnd = () => {
+    // Optional: Add any cleanup needed after column drag
+  };
+
+  const handleDeleteWithOptions = (option: 'delete' | 'move' | 'add', targetColumnId?: string, targetPipelineId?: string) => {
+    onDeleteWithOptions(column.id, option, targetColumnId, targetPipelineId);
+  };
+
+  const handleAddLabel = () => {
+    onAddLabelToColumn(column.id);
+  };
+  
+  // Check if all leads in this column are selected
+  const allLeadsSelected = useMemo(() => {
+    return leads.length > 0 && leads.every(lead => selectedLeads.has(lead.id));
+  }, [leads, selectedLeads]);
   
   return (
     <ColumnDragLayer
@@ -88,6 +137,10 @@ const Column: React.FC<ColumnProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      draggable={true}
+      onDragStart={handleColumnDragStart}
+      onDragEnd={handleColumnDragEnd}
+      columnId={column.id}
     >
       <ColumnHeader 
         name={column.name} 
@@ -95,6 +148,11 @@ const Column: React.FC<ColumnProps> = ({
         onRename={handleRename}
         onDelete={handleDelete}
         onSelectAll={handleSelectAll}
+        allSelected={allLeadsSelected}
+        columns={columns}
+        pipelineId={pipelineId}
+        onDeleteWithOptions={handleDeleteWithOptions}
+        onAddLabel={handleAddLabel}
       />
       
       <ColumnContent

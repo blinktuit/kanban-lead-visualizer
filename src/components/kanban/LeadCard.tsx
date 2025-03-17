@@ -12,6 +12,7 @@ interface LeadCardProps {
   onSelect: (id: string) => void;
   selected: boolean;
   isDragging?: boolean;
+  selectionActive: boolean;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({ 
@@ -19,7 +20,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
   settings, 
   onSelect,
   selected,
-  isDragging = false
+  isDragging = false,
+  selectionActive = false
 }) => {
   const [isHovering, setIsHovering] = useState(false);
   
@@ -61,7 +63,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      <div className="absolute top-2 left-2">
+      <div className={cn(
+        "absolute top-2 left-2 transition-opacity",
+        selectionActive || isHovering ? "opacity-100" : "opacity-0"
+      )}>
         <Checkbox
           checked={selected}
           onCheckedChange={() => onSelect(lead.id)}

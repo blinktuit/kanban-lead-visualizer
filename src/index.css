@@ -93,6 +93,7 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -102,9 +103,9 @@
 
 @layer components {
   .kanban-card {
-    @apply bg-white rounded-md p-4 shadow-card border border-border/30 mb-3 cursor-pointer 
+    @apply bg-white rounded-md p-4 shadow-card border border-border/50 mb-3 cursor-pointer 
            transition-all duration-250 ease-out-expo hover:shadow-card-hover 
-           hover:border-primary/20 animate-fade-in;
+           hover:border-primary/30 animate-fade-in;
   }
 
   .kanban-card.selected {
@@ -113,23 +114,23 @@
 
   .kanban-column {
     @apply bg-kanban-column rounded-lg p-3 flex-shrink-0 flex flex-col min-w-[280px] max-w-[280px] h-full
-           border border-border/40 shadow-column transition-colors duration-200;
+           border border-border/50 shadow-column transition-colors duration-200;
   }
 
   .kanban-column-header {
-    @apply flex items-center justify-between mb-2 px-1;
+    @apply flex items-center justify-between mb-2 px-1 pb-2 border-b border-border/20;
   }
 
   .kanban-title {
-    @apply font-medium text-sm text-foreground/80;
+    @apply font-medium text-sm text-foreground/90;
   }
 
   .kanban-count {
-    @apply text-xs rounded-full bg-primary/10 text-primary px-2 py-0.5 font-medium ml-2;
+    @apply text-xs rounded-full bg-primary/15 text-primary px-2 py-0.5 font-medium ml-2;
   }
 
   .kanban-scrollable {
-    @apply overflow-y-auto flex-grow pb-2 px-1 scrollbar-thin;
+    @apply overflow-y-auto flex-grow pb-2 px-1 max-h-[calc(100vh-180px)];
   }
 
   .kanban-menu-item {
@@ -210,4 +211,58 @@
   .sidebar-dropdown.open {
     height: auto;
   }
+}
+
+/* Custom scrollbar for the whole kanban board horizontal scrolling */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  @apply bg-muted rounded-full;
+}
+
+/* Improved styling for checkboxes and buttons */
+input[type="checkbox"], input[type="radio"] {
+  @apply text-primary border-primary/60 rounded focus:ring-primary/20;
+}
+
+.checkbox-modern {
+  @apply h-4 w-4 rounded border-2 border-primary/60 bg-white
+         checked:bg-primary checked:border-primary focus:outline-none
+         focus:ring-2 focus:ring-primary/20 transition-colors;
+}
+
+/* Make sure columns can scroll independently */
+.flex-1.overflow-x-auto {
+  overflow-y: hidden;
+}
+
+/* Style for column drag indicator */
+.column-drag-indicator {
+  @apply border-2 border-dashed border-primary/40 rounded-lg bg-primary/5;
+}
+
+/* Style for the column handle */
+.column-handle {
+  @apply cursor-move text-muted-foreground hover:text-foreground transition-colors;
+}
+
+/* Advanced styling for modern UI elements */
+.kanban-card {
+  @apply shadow-sm hover:shadow-md;
+  backdrop-filter: blur(8px);
+}
+
+/* Better styling for tag pills */
+.tag {
+  @apply text-xs inline-flex items-center px-2 py-0.5 rounded-full transition-colors;
+}
+
+.tag-selection {
+  @apply flex flex-wrap gap-1.5 mt-2;
 }

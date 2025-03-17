@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Column from './Column';
 import PipelineTitle from './PipelineTitle';
 import SearchLeads from './SearchLeads';
@@ -8,12 +8,27 @@ import ShareExport from './ShareExport';
 import AddColumn from './AddColumn';
 import BulkActions from './BulkActions';
 import { useKanbanBoard } from '@/hooks/useKanbanBoard';
+import { Button } from '@/components/ui/button';
+import { Plus, Filter } from 'lucide-react';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Lead, Tag } from '@/types';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface KanbanBoardProps {
   pipelineId: string;
 }
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
+  const [newLeadData, setNewLeadData] = useState<Partial<Lead>>({
+    name: '',
+    jobTitle: '',
+    company: '',
+    connectionStatus: 'none',
+    tags: []
+  });
+
   const {
     pipeline,
     leads,
@@ -26,6 +41,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
     setIsEditingTitle,
     editedTitle,
     setEditedTitle,
+    filteredTag,
+    isAddLeadOpen,
+    setIsAddLeadOpen,
     getColumnLeads,
     handleRenameColumn,
     handleDeleteColumn,
@@ -34,7 +52,12 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
     handleSelectLead,
     handleSelectAllInColumn,
     handleClearSelection,
-    handleUpdateTitle
+    handleUpdateTitle,
+    handleMoveColumn,
+    handleDeleteColumnWithOptions,
+    handleAddLead,
+    handleFilterByTag,
+    handleAddLabelToColumn
   } = useKanbanBoard(pipelineId);
   
   if (!pipeline || !settings) {
@@ -44,6 +67,26 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
       </div>
     );
   }
+
+  // Get all unique tags from all leads
+  const allTags = Array.from(
+    new Map(
+      leads
+        .flatMap(lead => lead.tags)
+        .map(tag => [tag.id, tag])
+    ).values()
+  );
+  
+  const handleAddLeadSubmit = () => {
+    handleAddLead(newLeadData);
+    setNewLeadData({
+      name: '',
+      jobTitle: '',
+      company: '',
+      connectionStatus: 'none',
+      tags: []
+    });
+  };
   
   return (
     <div className="h-full flex flex-col">
@@ -65,6 +108,55 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
           />
+
+          {/* Tag Filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant={filteredTag ? "default" : "outline"} 
+                size="sm"
+                className={filteredTag ? "bg-primary/80 hover:bg-primary/90" : ""}
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                {filteredTag ? "Filtering op tag" : "Filter"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-60">
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Filter op tag</h3>
+                
+                <div className="space-y-2">
+                  {allTags.length > 0 ? (
+                    allTags.map(tag => (
+                      <div key={tag.id} className="flex items-center">
+                        <button
+                          className={`flex items-center space-x-2 p-1 rounded w-full hover:bg-accent 
+                                     ${filteredTag === tag.id ? 'bg-primary/10 text-primary font-medium' : ''}`}
+                          onClick={() => handleFilterByTag(filteredTag === tag.id ? null : tag.id)}
+                        >
+                          <span className={`w-2.5 h-2.5 rounded-full bg-${tag.color}-500`}></span>
+                          <span>{tag.name}</span>
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Geen tags gevonden</div>
+                  )}
+                </div>
+                
+                {filteredTag && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => handleFilterByTag(null)}
+                  >
+                    Filter wissen
+                  </Button>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
           
           <DisplaySettings 
             settings={settings}
@@ -80,6 +172,12 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
           <ShareExport pipelineId={pipelineId} />
           
           <AddColumn onAddColumn={handleAddColumn} />
+
+          {/* Add Lead Button */}
+          <Button size="sm" onClick={() => setIsAddLeadOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Lead toevoegen
+          </Button>
         </div>
       </div>
       
@@ -111,10 +209,57 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
                 onSelectLead={handleSelectLead}
                 selectedLeads={selectedLeads}
                 onSelectAllInColumn={handleSelectAllInColumn}
+                columns={pipeline.columns}
+                pipelineId={pipelineId}
+                onMoveColumn={handleMoveColumn}
+                onDeleteWithOptions={handleDeleteColumnWithOptions}
+                onAddLabelToColumn={handleAddLabelToColumn}
               />
             ))}
         </div>
       </div>
+
+      {/* Add Lead Dialog */}
+      <Dialog open={isAddLeadOpen} onOpenChange={setIsAddLeadOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Lead toevoegen</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="name" className="text-sm font-medium">Naam</label>
+              <Input
+                id="name"
+                value={newLeadData.name}
+                onChange={(e) => setNewLeadData({...newLeadData, name: e.target.value})}
+                placeholder="Naam van de lead"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="company" className="text-sm font-medium">Bedrijf</label>
+              <Input
+                id="company"
+                value={newLeadData.company}
+                onChange={(e) => setNewLeadData({...newLeadData, company: e.target.value})}
+                placeholder="Bedrijfsnaam"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="jobTitle" className="text-sm font-medium">Functie</label>
+              <Input
+                id="jobTitle"
+                value={newLeadData.jobTitle}
+                onChange={(e) => setNewLeadData({...newLeadData, jobTitle: e.target.value})}
+                placeholder="Functietitel"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddLeadOpen(false)}>Cancel</Button>
+            <Button onClick={handleAddLeadSubmit}>Lead toevoegen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

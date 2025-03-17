@@ -2,6 +2,7 @@
 import React from 'react';
 import { Lead, KanbanSettings } from '@/types';
 import LeadCardContainer from './LeadCardContainer';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ColumnContentProps {
   leads: Lead[];
@@ -22,21 +23,28 @@ const ColumnContent: React.FC<ColumnContentProps> = ({
   onDragStart,
   onDragEnd
 }) => {
+  // Determine if selection mode is active
+  const selectionActive = selectedLeads.size > 0;
+  
   return (
-    <div className="kanban-scrollable">
-      {leads.map(lead => (
-        <LeadCardContainer 
-          key={lead.id}
-          lead={lead}
-          settings={settings}
-          onSelectLead={onSelectLead}
-          isSelected={selectedLeads.has(lead.id)}
-          isDragging={draggedLeadId === lead.id}
-          onDragStart={onDragStart}
-          onDragEnd={onDragEnd}
-        />
-      ))}
-    </div>
+    <ScrollArea className="kanban-scrollable" type="hover">
+      <div className="pr-1">
+        {leads.map(lead => (
+          <LeadCardContainer 
+            key={lead.id}
+            lead={lead}
+            settings={settings}
+            onSelectLead={onSelectLead}
+            isSelected={selectedLeads.has(lead.id)}
+            isDragging={draggedLeadId === lead.id}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+            selectionActive={selectionActive}
+            selectedCount={selectedLeads.size}
+          />
+        ))}
+      </div>
+    </ScrollArea>
   );
 };
 
