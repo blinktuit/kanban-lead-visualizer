@@ -32,11 +32,11 @@ const ColumnContent: React.FC<ColumnContentProps> = ({
   };
   
   return (
-    <div className="kanban-column-content h-full">
-      <ScrollArea className="h-full max-h-[calc(5*110px)]">
-        <div className="p-2 space-y-2">
+    <div className="kanban-column-content">
+      <ScrollArea className="h-full" style={{ maxHeight: 'calc(100vh - 220px)' }}>
+        <div className="px-1 py-1 space-y-2">
           {leads.length === 0 ? (
-            <div className="text-muted-foreground text-sm py-2 px-3 text-center">
+            <div className="text-muted-foreground text-sm py-4 px-3 text-center">
               Geen leads in deze kolom
             </div>
           ) : (

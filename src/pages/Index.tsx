@@ -34,10 +34,10 @@ const Index = () => {
   }, []);
   
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar />
       
-      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
+      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'} overflow-hidden`}>
         <KanbanBoard pipelineId={pipelineId} />
       </div>
     </div>

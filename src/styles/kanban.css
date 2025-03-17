@@ -32,14 +32,13 @@
   width: 100%;
   position: relative;
   padding-bottom: 16px; /* Space for the scrollbar */
-  height: calc(100vh - 120px);
+  height: calc(100vh - 130px);
 }
 
 .kanban-flex-container {
   display: flex;
   gap: 16px;
-  padding-bottom: 16px; /* Space for the scrollbar */
-  overflow-x: auto;
+  padding: 8px;
   min-height: calc(100vh - 180px);
   scrollbar-width: thin;
 }
@@ -74,6 +73,9 @@
   line-height: 1.2;
   height: 1.5rem;
   white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tag-blue {
@@ -108,7 +110,6 @@
   cursor: pointer;
   transition: all 0.2s;
   margin-right: 4px;
-  margin-left: 4px;
 }
 
 .tag-dashed:hover {
@@ -141,7 +142,6 @@
 .kanban-column-content {
   flex-grow: 1;
   overflow: hidden;
-  max-height: calc(100vh - 250px);
   height: 100%;
 }
 
@@ -149,7 +149,7 @@
 .kanban-board-container {
   padding: 16px;
   overflow-x: auto;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 130px);
 }
 
 /* Override the scrollbar styles */
@@ -181,4 +181,14 @@
   border: 1px solid hsl(var(--border));
   background-color: hsl(var(--kanban-column));
   padding: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Make popovers appear near the click location */
+.label-popover,
+.pipeline-popover {
+  position: fixed;
+  z-index: 50;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }

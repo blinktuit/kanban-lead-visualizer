@@ -43,9 +43,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const getStatusBadge = () => {
     if (lead.connectionStatus === 'pending') {
       return (
-        <div className="flex items-center mt-2">
+        <div className="flex items-center mt-1.5">
           <span className="inline-flex items-center text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
-            <span className="mr-1 w-1.5 h-1.5 bg-purple-500 rounded-full animate-ping-slow"></span>
+            <span className="mr-1 w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse"></span>
             Verbinding in behandeling
           </span>
         </div>
@@ -91,15 +91,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
           )}
         </div>
         
-        <div className="ml-3 flex-1">
-          <h3 className="font-medium text-sm">{lead.name}</h3>
+        <div className="ml-3 flex-1 overflow-hidden">
+          <h3 className="font-medium text-sm truncate">{lead.name}</h3>
           
           {settings.cardFields.showJobTitle && (
-            <p className="text-xs text-muted-foreground mt-0.5">{lead.jobTitle}</p>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">{lead.jobTitle}</p>
           )}
           
           {/* Always show company as requested */}
-          <p className="text-xs text-muted-foreground">{lead.company}</p>
+          <p className="text-xs text-muted-foreground truncate">{lead.company}</p>
           
           {settings.cardFields.showConnectionStatus && getStatusBadge()}
           
@@ -113,7 +113,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 )}
                 <button 
                   className="tag tag-dashed inline-flex"
-                  onClick={() => onAddLabel?.(lead.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddLabel?.(lead.id);
+                  }}
                 >
                   <Plus className="h-2.5 w-2.5 mr-1" />
                   Label
@@ -130,7 +133,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 <MoreHorizontal className="h-4 w-4" />
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-48 p-2" align="end">
+            <PopoverContent className="w-48 p-2" align="end" sideOffset={5}>
               <div className="flex flex-col space-y-1">
                 <button className="kanban-menu-item">
                   <MessageSquare className="h-4 w-4" />
@@ -138,7 +141,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 </button>
                 <button 
                   className="kanban-menu-item"
-                  onClick={() => onAddLabel?.(lead.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddLabel?.(lead.id);
+                  }}
                 >
                   <Tag className="h-4 w-4" />
                   <span>Label toevoegen</span>
@@ -149,7 +155,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 </button>
                 <button 
                   className="kanban-menu-item"
-                  onClick={() => onAddToPipeline?.(lead.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddToPipeline?.(lead.id);
+                  }}
                 >
                   <ListPlus className="h-4 w-4" />
                   <span>Aan pipeline toevoegen</span>

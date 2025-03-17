@@ -175,7 +175,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
                 {filteredTag ? "Filtering op tag" : "Filter"}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-60">
+            <PopoverContent className="w-60" align="end">
               <div className="space-y-4">
                 <h3 className="text-sm font-medium">Filter op tag</h3>
                 
@@ -249,7 +249,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
       )}
       
       {/* Kanban board - using the horizontal scroll container */}
-      <div className={cn("kanban-board-container p-6 overflow-auto", hasOverflow && "has-overflow")}>
+      <div className={cn("kanban-board-container p-4 overflow-auto", hasOverflow && "has-overflow")}>
         <div 
           className="kanban-flex-container"
           ref={scrollRef}
@@ -326,9 +326,8 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
       {/* Label Popover */}
       {isLabelPopoverOpen && activeLabelTarget && (
         <div className="fixed z-50" style={{
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)'
+          top: `${Math.min(window.innerHeight - 300, Math.max(100, window.mouseY || 300))}px`,
+          left: `${Math.min(window.innerWidth - 300, Math.max(100, window.mouseX || 300))}px`
         }}>
           <LabelPopover
             availableTags={allTags}
@@ -343,9 +342,8 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
       {/* Pipeline Selector */}
       {isPipelineSelectorOpen && activePipelineTarget && (
         <div className="fixed z-50" style={{
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)'
+          top: `${Math.min(window.innerHeight - 300, Math.max(100, window.mouseY || 300))}px`, 
+          left: `${Math.min(window.innerWidth - 300, Math.max(100, window.mouseX || 300))}px`
         }}>
           <PipelineSelector
             pipelines={pipelines}
