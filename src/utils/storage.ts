@@ -1,5 +1,4 @@
-
-import { Lead, Pipeline, KanbanSettings } from '@/types';
+import { Lead, Pipeline, KanbanSettings, ConnectionStatus } from '@/types';
 
 const STORAGE_PREFIX = 'linqed_kanban_';
 
@@ -127,7 +126,7 @@ export const getPipelines = (): Pipeline[] => {
 };
 
 // Get a specific pipeline by ID
-export const getPipeline = (id: string): Pipeline | undefined => {
+export const const getPipeline = (id: string): Pipeline | undefined => {
   const pipelines = getPipelines();
   return pipelines.find(p => p.id === id);
 };
