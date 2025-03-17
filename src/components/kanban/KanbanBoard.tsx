@@ -5,24 +5,16 @@ import {
   initializeStorage, 
   getPipeline, 
   getLeads, 
-  getLeadsForColumn, 
   getSettings,
   savePipelines,
   saveLeads,
-  moveLeadToColumn
 } from '@/utils/storage';
 import Column from './Column';
 import { Plus, Settings, Share, Download, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -41,15 +33,17 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [settings, setSettings] = useState<KanbanSettings | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isAddColumnOpen, setIsAddColumnOpen] = useState(false);
   const [newColumnName, setNewColumnName] = useState('');
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set());
   const [isBulkMode, setIsBulkMode] = useState(false);
-  const [isMoveBulkOpen, setIsMoveBulkOpen] = useState(false);
   const [targetColumnId, setTargetColumnId] = useState('');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
+  
+  // Popovers state
+  const [isAddColumnOpen, setIsAddColumnOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isMoveBulkOpen, setIsMoveBulkOpen] = useState(false);
   
   // Initialize local storage and load data
   useEffect(() => {
@@ -76,7 +70,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
   if (!pipeline || !settings) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="animate-pulse text-primary">Loading...</div>
+        <div className="animate-pulse text-primary">Laden...</div>
       </div>
     );
   }
@@ -109,11 +103,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
     setPipeline(updatedPipeline);
     
     // Save to local storage
-    const allPipelines = savePipelines([updatedPipeline]);
+    savePipelines([updatedPipeline]);
     
     toast({
-      title: "Column renamed",
-      description: `Column renamed to "${newName}"`,
+      title: "Kolom hernoemd",
+      description: `Kolom hernoemd naar "${newName}"`,
     });
   };
   
@@ -163,15 +157,15 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
     saveLeads(updatedLeads);
     
     toast({
-      title: "Column deleted",
-      description: "Column deleted successfully. Leads were moved to the previous column.",
+      title: "Kolom verwijderd",
+      description: "Kolom verwijderd. Leads zijn verplaatst naar de vorige kolom.",
     });
   };
   
-  const handleMoveCard = (leadId: string, targetColumnId: string) => {
+  const handleMoveCards = (leadIds: string[], targetColumnId: string) => {
     // Update local state
     const updatedLeads = leads.map(lead => {
-      if (lead.id === leadId) {
+      if (leadIds.includes(lead.id)) {
         return {
           ...lead,
           pipelinePositions: {
@@ -186,11 +180,13 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
     setLeads(updatedLeads);
     
     // Save to local storage
-    moveLeadToColumn(leadId, pipelineId, targetColumnId);
+    saveLeads(updatedLeads);
     
     toast({
-      title: "Lead moved",
-      description: "Lead moved to new column successfully.",
+      title: leadIds.length > 1 ? "Leads verplaatst" : "Lead verplaatst",
+      description: leadIds.length > 1 
+        ? `${leadIds.length} leads zijn verplaatst` 
+        : "Lead is verplaatst naar nieuwe kolom",
     });
   };
   
@@ -216,8 +212,8 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
     savePipelines([updatedPipeline]);
     
     toast({
-      title: "Column added",
-      description: `New column "${newColumnName}" added successfully.`,
+      title: "Kolom toegevoegd",
+      description: `Nieuwe kolom "${newColumnName}" toegevoegd`,
     });
   };
   
@@ -261,30 +257,13 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
   const handleBulkMove = () => {
     if (!targetColumnId) return;
     
-    // Update all selected leads
-    const updatedLeads = leads.map(lead => {
-      if (selectedLeads.has(lead.id)) {
-        return {
-          ...lead,
-          pipelinePositions: {
-            ...lead.pipelinePositions,
-            [pipelineId]: targetColumnId
-          }
-        };
-      }
-      return lead;
-    });
+    // Move all selected leads
+    handleMoveCards(Array.from(selectedLeads), targetColumnId);
     
-    setLeads(updatedLeads);
-    saveLeads(updatedLeads);
+    // Reset selections and UI state
     setSelectedLeads(new Set());
     setIsMoveBulkOpen(false);
     setTargetColumnId('');
-    
-    toast({
-      title: "Leads moved",
-      description: `${selectedLeads.size} leads moved successfully.`,
-    });
   };
   
   const handleUpdateTitle = () => {
@@ -302,8 +281,8 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
     savePipelines([updatedPipeline]);
     
     toast({
-      title: "Pipeline renamed",
-      description: `Pipeline renamed to "${editedTitle}"`,
+      title: "Pipeline hernoemd",
+      description: `Pipeline hernoemd naar "${editedTitle}"`,
     });
   };
   
@@ -313,8 +292,8 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
     // Copy to clipboard
     navigator.clipboard.writeText(shareUrl).then(() => {
       toast({
-        title: "Link copied",
-        description: "Shareable link copied to clipboard.",
+        title: "Link gekopieerd",
+        description: "Deelbare link is gekopieerd naar klembord",
       });
     });
   };
@@ -336,7 +315,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
                   if (e.key === 'Escape') setIsEditingTitle(false);
                 }}
               />
-              <Button size="sm" onClick={handleUpdateTitle}>Save</Button>
+              <Button size="sm" onClick={handleUpdateTitle}>Opslaan</Button>
               <Button 
                 size="sm" 
                 variant="ghost" 
@@ -346,7 +325,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
                 }}
                 className="ml-1"
               >
-                Cancel
+                Annuleren
               </Button>
             </div>
           ) : (
@@ -363,7 +342,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
           <div className="relative w-64">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search leads..."
+              placeholder="Leads zoeken..."
               className="pl-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -378,14 +357,96 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
             )}
           </div>
           
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setIsSettingsOpen(true)}
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            View
-          </Button>
+          <Popover open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Settings className="h-4 w-4 mr-2" />
+                Weergave
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72">
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Kaart velden</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="showJobTitle"
+                      checked={settings.cardFields.showJobTitle}
+                      onChange={(e) => {
+                        setSettings({
+                          ...settings,
+                          cardFields: {
+                            ...settings.cardFields,
+                            showJobTitle: e.target.checked
+                          }
+                        });
+                      }}
+                      className="mr-2"
+                    />
+                    <label htmlFor="showJobTitle" className="text-sm">Toon functietitel</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="showCompany"
+                      checked={settings.cardFields.showCompany}
+                      onChange={(e) => {
+                        setSettings({
+                          ...settings,
+                          cardFields: {
+                            ...settings.cardFields,
+                            showCompany: e.target.checked
+                          }
+                        });
+                      }}
+                      className="mr-2"
+                    />
+                    <label htmlFor="showCompany" className="text-sm">Toon bedrijf</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="showConnectionStatus"
+                      checked={settings.cardFields.showConnectionStatus}
+                      onChange={(e) => {
+                        setSettings({
+                          ...settings,
+                          cardFields: {
+                            ...settings.cardFields,
+                            showConnectionStatus: e.target.checked
+                          }
+                        });
+                      }}
+                      className="mr-2"
+                    />
+                    <label htmlFor="showConnectionStatus" className="text-sm">Toon connectiestatus</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="showTags"
+                      checked={settings.cardFields.showTags}
+                      onChange={(e) => {
+                        setSettings({
+                          ...settings,
+                          cardFields: {
+                            ...settings.cardFields,
+                            showTags: e.target.checked
+                          }
+                        });
+                      }}
+                      className="mr-2"
+                    />
+                    <label htmlFor="showTags" className="text-sm">Toon tags</label>
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-2 pt-2">
+                  <Button size="sm" onClick={() => setIsSettingsOpen(false)}>Toepassen</Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
           
           <Button 
             variant="outline"
@@ -393,7 +454,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
             onClick={handleShare}
           >
             <Share className="h-4 w-4 mr-2" />
-            Share
+            Delen
           </Button>
           
           <Button 
@@ -401,16 +462,32 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
             size="sm"
           >
             <Download className="h-4 w-4 mr-2" />
-            Export
+            Exporteren
           </Button>
           
-          <Button 
-            size="sm"
-            onClick={() => setIsAddColumnOpen(true)}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Column
-          </Button>
+          <Popover open={isAddColumnOpen} onOpenChange={setIsAddColumnOpen}>
+            <PopoverTrigger asChild>
+              <Button size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Kolom Toevoegen
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Nieuwe kolom toevoegen</h3>
+                <Input
+                  value={newColumnName}
+                  onChange={(e) => setNewColumnName(e.target.value)}
+                  placeholder="Kolom naam"
+                  className="w-full"
+                />
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" size="sm" onClick={() => setIsAddColumnOpen(false)}>Annuleren</Button>
+                  <Button size="sm" onClick={handleAddColumn}>Toevoegen</Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
       
@@ -418,26 +495,49 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
       {isBulkMode && (
         <div className="bg-primary/5 px-6 py-2 border-b border-border/40 flex items-center justify-between animate-slide-down">
           <div className="text-sm">
-            <span className="font-medium">{selectedLeads.size}</span> leads selected
+            <span className="font-medium">{selectedLeads.size}</span> leads geselecteerd
           </div>
           
           <div className="flex items-center gap-2">
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => setIsMoveBulkOpen(true)}
-            >
-              Move to column
-            </Button>
-            <Button size="sm" variant="outline">Add tag</Button>
-            <Button size="sm" variant="outline">Add to pipeline</Button>
-            <Button size="sm" variant="outline">Export</Button>
+            <Popover open={isMoveBulkOpen} onOpenChange={setIsMoveBulkOpen}>
+              <PopoverTrigger asChild>
+                <Button size="sm" variant="outline">
+                  Verplaatsen naar kolom
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64">
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium">
+                    Verplaats {selectedLeads.size} leads naar:
+                  </h3>
+                  <Select onValueChange={setTargetColumnId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecteer kolom" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {pipeline.columns.map((column) => (
+                        <SelectItem key={column.id} value={column.id}>
+                          {column.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" size="sm" onClick={() => setIsMoveBulkOpen(false)}>Annuleren</Button>
+                    <Button size="sm" onClick={handleBulkMove}>Verplaatsen</Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Button size="sm" variant="outline">Tag toevoegen</Button>
+            <Button size="sm" variant="outline">Toevoegen aan pipeline</Button>
+            <Button size="sm" variant="outline">Exporteren</Button>
             <Button 
               size="sm" 
               variant="ghost"
               onClick={handleClearSelection}
             >
-              Cancel
+              Annuleren
             </Button>
           </div>
         </div>
@@ -456,7 +556,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
                 settings={settings}
                 onRenameColumn={handleRenameColumn}
                 onDeleteColumn={handleDeleteColumn}
-                onMoveCard={handleMoveCard}
+                onMoveCard={handleMoveCards}
                 onSelectLead={handleSelectLead}
                 selectedLeads={selectedLeads}
                 onSelectAllInColumn={handleSelectAllInColumn}
@@ -464,149 +564,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ pipelineId }) => {
             ))}
         </div>
       </div>
-      
-      {/* Add Column Dialog */}
-      <Dialog open={isAddColumnOpen} onOpenChange={setIsAddColumnOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add new column</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <Input
-              value={newColumnName}
-              onChange={(e) => setNewColumnName(e.target.value)}
-              placeholder="Column name"
-              className="w-full"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddColumnOpen(false)}>Cancel</Button>
-            <Button onClick={handleAddColumn}>Add Column</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Settings Dialog */}
-      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>View settings</DialogTitle>
-          </DialogHeader>
-          <div className="py-4 space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Card fields</h3>
-              <div className="space-y-1">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="showJobTitle"
-                    checked={settings.cardFields.showJobTitle}
-                    onChange={(e) => {
-                      setSettings({
-                        ...settings,
-                        cardFields: {
-                          ...settings.cardFields,
-                          showJobTitle: e.target.checked
-                        }
-                      });
-                    }}
-                    className="mr-2"
-                  />
-                  <label htmlFor="showJobTitle" className="text-sm">Show job title</label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="showCompany"
-                    checked={settings.cardFields.showCompany}
-                    onChange={(e) => {
-                      setSettings({
-                        ...settings,
-                        cardFields: {
-                          ...settings.cardFields,
-                          showCompany: e.target.checked
-                        }
-                      });
-                    }}
-                    className="mr-2"
-                  />
-                  <label htmlFor="showCompany" className="text-sm">Show company</label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="showConnectionStatus"
-                    checked={settings.cardFields.showConnectionStatus}
-                    onChange={(e) => {
-                      setSettings({
-                        ...settings,
-                        cardFields: {
-                          ...settings.cardFields,
-                          showConnectionStatus: e.target.checked
-                        }
-                      });
-                    }}
-                    className="mr-2"
-                  />
-                  <label htmlFor="showConnectionStatus" className="text-sm">Show connection status</label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="showTags"
-                    checked={settings.cardFields.showTags}
-                    onChange={(e) => {
-                      setSettings({
-                        ...settings,
-                        cardFields: {
-                          ...settings.cardFields,
-                          showTags: e.target.checked
-                        }
-                      });
-                    }}
-                    className="mr-2"
-                  />
-                  <label htmlFor="showTags" className="text-sm">Show tags</label>
-                </div>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsSettingsOpen(false)}>Cancel</Button>
-            <Button>Apply</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Move Bulk Dialog */}
-      <Dialog open={isMoveBulkOpen} onOpenChange={setIsMoveBulkOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Move leads</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-sm mb-4">
-              Move {selectedLeads.size} leads to:
-            </p>
-            <Select onValueChange={setTargetColumnId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select column" />
-              </SelectTrigger>
-              <SelectContent>
-                {pipeline.columns.map((column) => (
-                  <SelectItem key={column.id} value={column.id}>
-                    {column.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsMoveBulkOpen(false)}>Cancel</Button>
-            <Button onClick={handleBulkMove}>Move</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

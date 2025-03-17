@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -17,13 +17,13 @@
     --primary: 196 80% 42%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 0 0% 96%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 210 40% 96.1%;
+    --muted: 0 0% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
+    --accent: 0 0% 96%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -105,6 +105,10 @@
     @apply bg-white rounded-md p-4 shadow-card border border-border/30 mb-3 cursor-pointer 
            transition-all duration-250 ease-out-expo hover:shadow-card-hover 
            hover:border-primary/20 animate-fade-in;
+  }
+
+  .kanban-card.selected {
+    @apply border-primary/50 bg-primary/5 shadow-md;
   }
 
   .kanban-column {

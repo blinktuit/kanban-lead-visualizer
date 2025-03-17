@@ -1,3 +1,4 @@
+
 import { Lead, Pipeline, KanbanSettings, ConnectionStatus } from '@/types';
 
 const STORAGE_PREFIX = 'linqed_kanban_';
@@ -14,12 +15,12 @@ const defaultSettings: KanbanSettings = {
 const defaultPipelines: Pipeline[] = [
   {
     id: 'pipeline1',
-    name: 'Sales Pipeline',
+    name: 'Verkoop Pipeline',
     columns: [
-      { id: 'col1', name: 'New Leads', order: 0 },
-      { id: 'col2', name: 'Contacted', order: 1 },
-      { id: 'col3', name: 'Responding', order: 2 },
-      { id: 'col4', name: 'Meeting Scheduled', order: 3 },
+      { id: 'col1', name: 'Nieuwe Leads', order: 0 },
+      { id: 'col2', name: 'Contact Gelegd', order: 1 },
+      { id: 'col3', name: 'In Gesprek', order: 2 },
+      { id: 'col4', name: 'Afspraak Gepland', order: 3 },
       { id: 'col5', name: 'Deal', order: 4 },
     ],
   },
@@ -31,48 +32,56 @@ const defaultPipelines: Pipeline[] = [
       { id: 'col7', name: 'Leads', order: 1 },
       { id: 'col8', name: 'MQL', order: 2 },
       { id: 'col9', name: 'SQL', order: 3 },
-      { id: 'col10', name: 'Customer', order: 4 },
+      { id: 'col10', name: 'Klant', order: 4 },
     ],
   },
 ];
 
 // Sample tags
 const tags = [
-  { id: 'tag1', name: 'High Priority', color: 'red' as const },
-  { id: 'tag2', name: 'Interested', color: 'green' as const },
+  { id: 'tag1', name: 'Hoge Prioriteit', color: 'red' as const },
+  { id: 'tag2', name: 'Geïnteresseerd', color: 'green' as const },
   { id: 'tag3', name: 'Follow-up', color: 'blue' as const },
-  { id: 'tag4', name: 'Cold', color: 'purple' as const },
-  { id: 'tag5', name: 'Hot Lead', color: 'amber' as const },
+  { id: 'tag4', name: 'Koud Contact', color: 'purple' as const },
+  { id: 'tag5', name: 'Warme Lead', color: 'amber' as const },
 ];
 
-// Sample lead data with realistic info for 30 leads
+// Sample lead data with Dutch names
 const generateSampleLeads = (): Lead[] => {
   const names = [
-    'John van Rooj', 'Emma Johnson', 'Michael Smith', 'Sophie Williams', 'David Brown',
-    'Olivia Davis', 'Daniel Miller', 'Ava Wilson', 'James Moore', 'Isabella Taylor',
-    'Alexander Anderson', 'Charlotte Thomas', 'William Jackson', 'Amelia White', 'Benjamin Harris',
-    'Mia Martin', 'Henry Thompson', 'Emily Garcia', 'Sebastian Martinez', 'Ella Robinson',
-    'Jack Wright', 'Grace Hill', 'Oliver Scott', 'Chloe Green', 'Lucas Adams',
-    'Lily Baker', 'Aiden Nelson', 'Zoe Hall', 'Luke Allen', 'Layla Young'
+    'Jan de Vries', 'Emma Jansen', 'Luuk Bakker', 'Sophie de Boer', 'Thomas van Dijk',
+    'Julia Visser', 'Daan Smit', 'Lotte Mulder', 'Sem Bos', 'Evi van Leeuwen',
+    'Lucas Meyer', 'Tess de Groot', 'Finn Vos', 'Sara Peters', 'Max Hendriks',
+    'Noa de Jong', 'Thijs Dekker', 'Zoë van den Berg', 'Jesse Dijkstra', 'Lynn Kok',
+    'Ruben Vermeulen', 'Mila van der Meer', 'Jayden de Wit', 'Fenna Verhoeven', 'Sven Jacobs',
+    'Roos Maas', 'Stijn van der Linden', 'Noor Scholten', 'Bram Prins', 'Eva Huisman'
   ];
   
   const jobTitles = [
-    'Sales Director', 'Marketing Manager', 'CEO', 'CTO', 'Product Manager',
-    'Software Engineer', 'HR Director', 'Finance Manager', 'Operations Director', 'Business Analyst'
+    'Verkoopdirecteur', 'Marketing Manager', 'CEO', 'CTO', 'Product Manager',
+    'Software Ontwikkelaar', 'HR Directeur', 'Financieel Manager', 'Operations Directeur', 'Business Analist'
   ];
   
   const companies = [
-    'Ideo B.V.', 'TechGiant Inc.', 'GlobalSoft', 'Innovate Solutions', 'NextLevel Corp',
-    'FutureTech', 'DigitalEdge', 'SmartSystems', 'CreativeMinds', 'StrategyPlus'
+    'Rabobank', 'Philips', 'ASML', 'Albert Heijn', 'KLM',
+    'ING Bank', 'Shell Nederland', 'Heineken', 'Ahold Delhaize', 'ABN AMRO'
   ];
   
   const statuses: ConnectionStatus[] = ['pending', 'connected', 'none'];
   
+  // Profile image paths - using placeholder images but in a real app, these would be actual profile images
+  const profileImages = [
+    '/placeholder.svg', 
+    '/placeholder.svg',
+    '/placeholder.svg',
+    '/placeholder.svg',
+    '/placeholder.svg'
+  ];
+  
   return Array.from({ length: 30 }, (_, i) => {
-    // Randomly select 1-3 tags for each lead
-    const leadTags = [...tags]
-      .sort(() => 0.5 - Math.random())
-      .slice(0, Math.floor(Math.random() * 3) + 1);
+    // Select just one tag for each lead as requested
+    const randomTagIndex = Math.floor(Math.random() * tags.length);
+    const leadTag = [tags[randomTagIndex]];
     
     // Distribute leads across pipelines and columns
     let pipelinePositions: { [key: string]: string } = {};
@@ -92,10 +101,10 @@ const generateSampleLeads = (): Lead[] => {
     return {
       id: `lead${i + 1}`,
       name: names[i % names.length],
-      photoUrl: `/placeholder.svg`, // Using placeholder images
+      photoUrl: profileImages[i % profileImages.length],
       jobTitle: jobTitles[Math.floor(Math.random() * jobTitles.length)],
       company: companies[Math.floor(Math.random() * companies.length)],
-      tags: leadTags,
+      tags: leadTag, // Now just using one tag
       connectionStatus: statuses[Math.floor(Math.random() * statuses.length)],
       pipelinePositions,
     };

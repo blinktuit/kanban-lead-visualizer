@@ -3,12 +3,7 @@ import React, { useState } from 'react';
 import { MoreHorizontal, MessageSquare, Tag, ArrowRight, ListPlus, RefreshCw } from 'lucide-react';
 import { Lead, Tag as TagType, KanbanSettings } from '@/types';
 import { cn } from '@/lib/utils';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface LeadCardProps {
@@ -16,13 +11,15 @@ interface LeadCardProps {
   settings: KanbanSettings;
   onSelect: (id: string) => void;
   selected: boolean;
+  isDragging?: boolean;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({ 
   lead, 
   settings, 
   onSelect,
-  selected
+  selected,
+  isDragging = false
 }) => {
   const [isHovering, setIsHovering] = useState(false);
   
@@ -43,7 +40,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         <div className="flex items-center mt-2">
           <span className="inline-flex items-center text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
             <span className="mr-1 w-1.5 h-1.5 bg-purple-500 rounded-full animate-ping-slow"></span>
-            Connection pending
+            Verbinding in behandeling
           </span>
         </div>
       );
@@ -51,13 +48,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
     return null;
   };
   
+  // Only display one tag as requested
+  const displayTag = lead.tags.length > 0 ? lead.tags[0] : null;
+  
   return (
     <div 
-      className="kanban-card relative group"
+      className={cn(
+        "kanban-card relative group",
+        selected && "selected",
+        isDragging && "opacity-70"
+      )}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      <div className="absolute top-2 left-2">
         <Checkbox
           checked={selected}
           onCheckedChange={() => onSelect(lead.id)}
@@ -65,7 +69,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         />
       </div>
 
-      <div className="flex items-start">
+      <div className="flex items-start pl-6">
         <div 
           className="w-10 h-10 rounded-full bg-muted flex-shrink-0 flex items-center justify-center overflow-hidden"
           style={{ opacity: isHovering ? 0.8 : 1 }}
@@ -84,53 +88,52 @@ const LeadCard: React.FC<LeadCardProps> = ({
             <p className="text-xs text-muted-foreground mt-0.5">{lead.jobTitle}</p>
           )}
           
-          {settings.cardFields.showCompany && (
-            <p className="text-xs text-muted-foreground">{lead.company}</p>
-          )}
+          {/* Always show company as requested */}
+          <p className="text-xs text-muted-foreground">{lead.company}</p>
           
           {settings.cardFields.showConnectionStatus && getStatusBadge()}
           
-          {settings.cardFields.showTags && lead.tags.length > 0 && (
+          {settings.cardFields.showTags && displayTag && (
             <div className="flex flex-wrap gap-1.5 mt-2">
-              {lead.tags.map(tag => (
-                <span key={tag.id} className={cn("tag", getTagClass(tag.color))}>
-                  {tag.name}
-                </span>
-              ))}
+              <span className={cn("tag", getTagClass(displayTag.color))}>
+                {displayTag.name}
+              </span>
             </div>
           )}
         </div>
         
         <div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <Popover>
+            <PopoverTrigger asChild>
               <button className="text-muted-foreground hover:text-foreground p-0.5 rounded">
                 <MoreHorizontal className="h-4 w-4" />
               </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-48" align="end">
-              <DropdownMenuItem className="kanban-menu-item">
-                <MessageSquare className="h-4 w-4" />
-                <span>Add note</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="kanban-menu-item">
-                <Tag className="h-4 w-4" />
-                <span>Add tag</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="kanban-menu-item">
-                <ArrowRight className="h-4 w-4" />
-                <span>Move to column</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="kanban-menu-item">
-                <ListPlus className="h-4 w-4" />
-                <span>Add to pipeline</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="kanban-menu-item">
-                <RefreshCw className="h-4 w-4" />
-                <span>Update info</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </PopoverTrigger>
+            <PopoverContent className="w-48 p-2" align="end">
+              <div className="flex flex-col space-y-1">
+                <button className="kanban-menu-item">
+                  <MessageSquare className="h-4 w-4" />
+                  <span>Notitie toevoegen</span>
+                </button>
+                <button className="kanban-menu-item">
+                  <Tag className="h-4 w-4" />
+                  <span>Tag toevoegen</span>
+                </button>
+                <button className="kanban-menu-item">
+                  <ArrowRight className="h-4 w-4" />
+                  <span>Verplaatsen</span>
+                </button>
+                <button className="kanban-menu-item">
+                  <ListPlus className="h-4 w-4" />
+                  <span>Aan pipeline toevoegen</span>
+                </button>
+                <button className="kanban-menu-item">
+                  <RefreshCw className="h-4 w-4" />
+                  <span>Info bijwerken</span>
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
     </div>

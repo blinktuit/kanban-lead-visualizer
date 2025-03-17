@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -19,6 +18,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Figtree', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -64,10 +66,10 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				kanban: {
-					column: '#f7f9fc',
-					columnHover: '#f0f2f5',
+					column: '#ffffff',
+					columnHover: '#f9f9f9',
 					card: '#ffffff',
-					cardHover: '#fafbfd',
+					cardHover: '#fafafa',
 				}
 			},
 			borderRadius: {
