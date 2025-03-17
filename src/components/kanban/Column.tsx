@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Column as ColumnType, Lead, KanbanSettings } from '@/types';
-import LeadCard from './LeadCard';
 import ColumnHeader from './ColumnHeader';
+import ColumnDragLayer from './ColumnDragLayer';
+import ColumnContent from './ColumnContent';
+import { useColumn } from '@/hooks/useColumn';
 import { cn } from '@/lib/utils';
 
 interface ColumnProps {
@@ -27,21 +29,18 @@ const Column: React.FC<ColumnProps> = ({
   selectedLeads,
   onSelectAllInColumn
 }) => {
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [draggedLeadId, setDraggedLeadId] = useState<string | null>(null);
-  
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-  
-  const handleDragLeave = () => {
-    setIsDragOver(false);
-  };
+  const {
+    isDragOver,
+    draggedLeadId,
+    handleDragOver,
+    handleDragLeave,
+    handleDragEnd,
+    handleDragStart
+  } = useColumn();
   
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragOver(false);
+    handleDragLeave();
     
     const data = e.dataTransfer.getData('text/plain');
     
@@ -79,41 +78,13 @@ const Column: React.FC<ColumnProps> = ({
     onSelectAllInColumn(column.id);
   };
   
-  const handleDragStart = (e: React.DragEvent, leadId: string) => {
-    setDraggedLeadId(leadId);
-    
-    // If the dragged item is part of a selection, transfer all selected lead IDs
-    if (selectedLeads.has(leadId) && selectedLeads.size > 1) {
-      e.dataTransfer.setData('text/plain', JSON.stringify(Array.from(selectedLeads)));
-    } else {
-      // Just transfer the single lead ID
-      e.dataTransfer.setData('text/plain', leadId);
-      
-      // If dragging a non-selected item, deselect everything else
-      if (!selectedLeads.has(leadId)) {
-        // Clear other selections
-        selectedLeads.forEach(id => {
-          if (id !== leadId) onSelectLead(id, false);
-        });
-        
-        // Select just this one
-        onSelectLead(leadId, true);
-      }
-    }
-    
-    e.dataTransfer.effectAllowed = 'move';
-  };
-  
-  const handleDragEnd = () => {
-    setDraggedLeadId(null);
+  const handleLeadDragStart = (e: React.DragEvent, leadId: string) => {
+    handleDragStart(e, leadId, selectedLeads, onSelectLead);
   };
   
   return (
-    <div 
-      className={cn(
-        "kanban-column",
-        isDragOver && "border-primary/50 bg-kanban-columnHover"
-      )}
+    <ColumnDragLayer
+      isDragOver={isDragOver}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -126,25 +97,16 @@ const Column: React.FC<ColumnProps> = ({
         onSelectAll={handleSelectAll}
       />
       
-      <div className="kanban-scrollable">
-        {leads.map(lead => (
-          <div
-            key={lead.id}
-            draggable
-            onDragStart={(e) => handleDragStart(e, lead.id)}
-            onDragEnd={handleDragEnd}
-          >
-            <LeadCard 
-              lead={lead} 
-              settings={settings}
-              onSelect={(id) => onSelectLead(id, !selectedLeads.has(id))}
-              selected={selectedLeads.has(lead.id)}
-              isDragging={draggedLeadId === lead.id}
-            />
-          </div>
-        ))}
-      </div>
-    </div>
+      <ColumnContent
+        leads={leads}
+        settings={settings}
+        onSelectLead={onSelectLead}
+        selectedLeads={selectedLeads}
+        draggedLeadId={draggedLeadId}
+        onDragStart={handleLeadDragStart}
+        onDragEnd={handleDragEnd}
+      />
+    </ColumnDragLayer>
   );
 };
 
