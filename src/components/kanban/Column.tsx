@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Column as ColumnType, Lead, KanbanSettings } from '@/types';
 import ColumnHeader from './ColumnHeader';
@@ -18,7 +17,7 @@ interface ColumnProps {
   onMoveCard: (leadIds: string[], targetColumnId: string) => void;
   onSelectLead: (leadId: string, selected: boolean) => void;
   selectedLeads: Set<string>;
-  onSelectAllInColumn: (columnId: string) => void;
+  onSelectAllInColumn: (columnLeads: Lead[]) => void;
   columns: ColumnType[];
   pipelineId: string;
   onMoveColumn: (columnId: string, newIndex: number) => void;
@@ -109,7 +108,7 @@ const Column: React.FC<ColumnProps> = ({
   };
   
   const handleSelectAll = () => {
-    onSelectAllInColumn(column.id);
+    onSelectAllInColumn(leads);
   };
   
   const handleLeadDragStart = (e: React.DragEvent, leadId: string) => {

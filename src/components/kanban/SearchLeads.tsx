@@ -1,29 +1,57 @@
-
-import React from 'react';
-import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import React, { useState } from 'react';
+import { Search, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface SearchLeadsProps {
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
+  onSearch: (term: string) => void;
+  initialSearchTerm?: string;
 }
 
-const SearchLeads: React.FC<SearchLeadsProps> = ({ searchTerm, setSearchTerm }) => {
+const SearchLeads = ({ onSearch, initialSearchTerm = '' }: SearchLeadsProps) => {
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
+  
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    onSearch(value);
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
+    onSearch('');
+  };
+
   return (
-    <div className="relative w-64">
-      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-      <Input
-        placeholder="Leads zoeken..."
-        className="pl-8"
+    <div className={cn(
+      "relative flex items-center transition-all duration-200 ease-in-out rounded-full",
+      "bg-muted/60 hover:bg-muted focus-within:bg-muted/90",
+      "border border-border/40 shadow-sm",
+      searchTerm ? "w-72" : "w-64"
+    )}>
+      <div className="flex items-center justify-center w-9 h-9 pointer-events-none">
+        <Search className="w-4 h-4 text-muted-foreground" />
+      </div>
+      
+      <input
+        type="text"
+        placeholder="Zoek leads..."
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={handleSearch}
+        className={cn(
+          "bg-transparent outline-none w-full py-2 pr-3 text-sm",
+          "placeholder:text-muted-foreground/70 focus:placeholder:text-muted-foreground/50"
+        )}
       />
+      
       {searchTerm && (
-        <button
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          onClick={() => setSearchTerm('')}
+        <button 
+          onClick={clearSearch}
+          className={cn(
+            "flex items-center justify-center w-7 h-7 rounded-full mr-1",
+            "hover:bg-accent/80 transition-colors text-muted-foreground hover:text-foreground"
+          )}
         >
-          ×
+          <X className="h-3.5 w-3.5" />
         </button>
       )}
     </div>

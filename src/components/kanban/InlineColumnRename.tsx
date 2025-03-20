@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 
@@ -8,6 +7,8 @@ interface InlineColumnRenameProps {
   isEditing: boolean;
   onRename: (newName: string) => void;
   onEditingComplete: () => void;
+  onStartEditing?: () => void;
+  onSelectAll?: () => void;
 }
 
 const InlineColumnRename: React.FC<InlineColumnRenameProps> = ({
@@ -15,7 +16,9 @@ const InlineColumnRename: React.FC<InlineColumnRenameProps> = ({
   count,
   isEditing,
   onRename,
-  onEditingComplete
+  onEditingComplete,
+  onStartEditing,
+  onSelectAll
 }) => {
   const [editedName, setEditedName] = useState(name);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -64,8 +67,27 @@ const InlineColumnRename: React.FC<InlineColumnRenameProps> = ({
   
   return (
     <>
-      <h3 className="kanban-title">{name}</h3>
-      <span className="kanban-count">{count}</span>
+      <h3 
+        className="kanban-title cursor-pointer" 
+        onDoubleClick={() => {
+          if (!isEditing && onStartEditing) {
+            setEditedName(name);
+            onStartEditing();
+          }
+        }}
+      >
+        {name}
+      </h3>
+      <button 
+        className="kanban-count ml-1.5 hover:bg-primary/10 rounded transition-colors cursor-pointer flex items-center justify-center" 
+        title="Selecteer alle leads in deze kolom"
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectAll?.();
+        }}
+      >
+        {count}
+      </button>
     </>
   );
 };

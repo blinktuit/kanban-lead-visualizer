@@ -13,7 +13,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 196 80% 42%;
+    --primary: 168 54% 46%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 0 0% 96%;
@@ -30,18 +30,18 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 196 80% 42%;
+    --ring: 168 54% 46%;
 
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 13%; /* Dark gray */
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 196 80% 42%;
+    --sidebar-primary: 168 54% 46%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 0 0% 18%; /* Adjusted to match */
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 0 0% 18%; /* Adjusted to match */
-    --sidebar-ring: 196 80% 42%;
+    --sidebar-ring: 168 54% 46%;
 
     --kanban-column: 210 40% 98%;
     --kanban-column-hover: 210 40% 96%;
@@ -59,7 +59,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 196 80% 42%;
+    --primary: 168 54% 46%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -80,12 +80,12 @@
     
     --sidebar-background: 0 0% 13%; /* Dark gray sidebar */
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 196 80% 42%;
+    --sidebar-primary: 168 54% 46%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 18%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 196 80% 42%;
+    --sidebar-ring: 168 54% 46%;
 
     --kanban-column: 217 33% 17.5%;
     --kanban-column-hover: 217 33% 22%;
@@ -160,7 +160,7 @@
   }
 
   .tag-blue {
-    @apply bg-blue-100 text-blue-800;
+    @apply bg-primary/20 text-primary;
   }
 
   .tag-green {

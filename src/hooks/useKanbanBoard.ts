@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Lead } from '@/types';
 import { useKanbanData } from './kanban/useKanbanData';
@@ -36,6 +35,7 @@ export function useKanbanBoard(pipelineId: string) {
     selectedLeads,
     isBulkMode,
     handleSelectLead,
+    handleSelectAllInColumn,
     handleClearSelection
   } = useLeadSelection();
   
@@ -63,26 +63,6 @@ export function useKanbanBoard(pipelineId: string) {
     setEditedTitle,
     handleUpdateTitle
   } = usePipelineTitle(pipeline, setPipeline);
-  
-  // Adapt the selection handler for columns to use getColumnLeads
-  const handleSelectAllInColumn = (columnId: string) => {
-    const columnLeads = getColumnLeads(columnId);
-    
-    // If all are already selected, deselect all
-    const allAlreadySelected = columnLeads.every(lead => selectedLeads.has(lead.id));
-    
-    if (allAlreadySelected) {
-      // Deselect all in this column
-      columnLeads.forEach(lead => {
-        handleSelectLead(lead.id, false);
-      });
-    } else {
-      // Select all in this column
-      columnLeads.forEach(lead => {
-        handleSelectLead(lead.id, true);
-      });
-    }
-  };
   
   // Wrapper methods to provide consistent API with original hook
   const moveCards = (leadIds: string[], targetColumnId: string) => {

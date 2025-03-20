@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { MoreHorizontal, Plus, Pencil, Trash2, Download, Tag, CheckSquare, Grip } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -73,6 +72,10 @@ const ColumnHeader: React.FC<ColumnHeaderProps> = ({
     setIsEditing(false);
   };
   
+  const handleStartEditing = () => {
+    setIsEditing(true);
+  };
+  
   const handleDeleteConfirm = () => {
     if (deleteOption === 'move' && !targetColumnId) {
       return; // Don't proceed if no column selected
@@ -108,19 +111,16 @@ const ColumnHeader: React.FC<ColumnHeaderProps> = ({
           <Grip className="h-4 w-4 text-muted-foreground" />
         </div>
         
-        {/* We now integrate selection with column count */}
-        <div className="flex items-center" onClick={onSelectAll}>
+        {/* Column name and count as integated selection trigger */}
+        <div className="flex items-center">
           <InlineColumnRename 
             name={name}
             count={count}
             isEditing={isEditing}
             onRename={onRename}
             onEditingComplete={handleRenameComplete}
-          />
-          <Checkbox 
-            className="h-3.5 w-3.5 ml-1 data-[state=checked]:bg-primary/70 data-[state=checked]:text-primary-foreground border-muted-foreground/50"
-            checked={allSelected && count > 0}
-            onCheckedChange={onSelectAll}
+            onStartEditing={handleStartEditing}
+            onSelectAll={onSelectAll}
           />
         </div>
       </div>

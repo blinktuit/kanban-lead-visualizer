@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,7 @@ const ColumnFooter: React.FC<ColumnFooterProps> = ({ columnId, onAddLead }) => {
       <Button 
         variant="ghost" 
         size="sm" 
-        className="w-full justify-start text-muted-foreground hover:text-foreground"
+        className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted/50"
         onClick={() => onAddLead(columnId)}
       >
         <Plus className="h-4 w-4 mr-1" />

@@ -1,4 +1,3 @@
-
 import { Lead, Pipeline, KanbanSettings, ConnectionStatus } from '@/types';
 
 const STORAGE_PREFIX = 'linqed_kanban_';
@@ -79,9 +78,30 @@ const generateSampleLeads = (): Lead[] => {
   ];
   
   return Array.from({ length: 30 }, (_, i) => {
-    // Select just one tag for each lead as requested
-    const randomTagIndex = Math.floor(Math.random() * tags.length);
-    const leadTag = [tags[randomTagIndex]];
+    // Geef sommige leads meerdere tags
+    let leadTags;
+    if (i % 3 === 0) {
+      // Elke derde lead krijgt 1 tag
+      const randomTagIndex = Math.floor(Math.random() * tags.length);
+      leadTags = [tags[randomTagIndex]];
+    } else if (i % 3 === 1) {
+      // Elke lead met rest 1 krijgt 2 tags
+      const randomTagIndex1 = Math.floor(Math.random() * tags.length);
+      let randomTagIndex2;
+      do {
+        randomTagIndex2 = Math.floor(Math.random() * tags.length);
+      } while (randomTagIndex2 === randomTagIndex1);
+      
+      leadTags = [tags[randomTagIndex1], tags[randomTagIndex2]];
+    } else {
+      // Elke lead met rest 2 krijgt 3 tags
+      const usedIndices = new Set<number>();
+      while (usedIndices.size < 3) {
+        usedIndices.add(Math.floor(Math.random() * tags.length));
+      }
+      
+      leadTags = Array.from(usedIndices).map(index => tags[index]);
+    }
     
     // Distribute leads across pipelines and columns
     let pipelinePositions: { [key: string]: string } = {};
@@ -104,7 +124,7 @@ const generateSampleLeads = (): Lead[] => {
       photoUrl: profileImages[i % profileImages.length],
       jobTitle: jobTitles[Math.floor(Math.random() * jobTitles.length)],
       company: companies[Math.floor(Math.random() * companies.length)],
-      tags: leadTag, // Now just using one tag
+      tags: leadTags, // Nu meerdere tags per lead
       connectionStatus: statuses[Math.floor(Math.random() * statuses.length)],
       pipelinePositions,
     };

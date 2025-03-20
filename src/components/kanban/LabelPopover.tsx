@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tag } from '@/types';
 import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,6 +23,23 @@ const LabelPopover: React.FC<LabelPopoverProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [newTagName, setNewTagName] = useState('');
   const [showNewTagInput, setShowNewTagInput] = useState(false);
+  
+  // Effect om te detecteren wanneer er buiten de popover wordt geklikt
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const popover = document.querySelector('.label-popover');
+      if (popover && !popover.contains(target)) {
+        onClose();
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
   
   const filteredTags = availableTags.filter(tag => 
     tag.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -59,7 +75,7 @@ const LabelPopover: React.FC<LabelPopoverProps> = ({
   };
   
   return (
-    <div className="w-64 p-3 rounded-md bg-background border shadow-md" onClick={(e) => e.stopPropagation()}>
+    <div className="w-64 p-3 rounded-md bg-background border shadow-md label-popover" onClick={(e) => e.stopPropagation()}>
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-sm font-medium">Labels toevoegen</h3>
         <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={onClose}>

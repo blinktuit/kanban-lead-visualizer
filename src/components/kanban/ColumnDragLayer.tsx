@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -27,6 +26,7 @@ const ColumnDragLayer: React.FC<ColumnDragLayerProps> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isColumnDrop, setIsColumnDrop] = useState(false);
+  const [dropPosition, setDropPosition] = useState<'left' | 'right' | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
   // Check if the dragged item is a column (not a lead)
@@ -34,6 +34,18 @@ const ColumnDragLayer: React.FC<ColumnDragLayerProps> = ({
     // Check if a column is being dragged (check dataTransfer)
     const isColumn = e.dataTransfer.types.includes('column-id');
     setIsColumnDrop(isColumn);
+    
+    // Als het een kolom is, bepaal dan aan welke kant de drop indicator moet komen
+    if (isColumn && ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      const mouseX = e.clientX;
+      const columnCenterX = rect.left + rect.width / 2;
+      
+      // Stel in of de drop indicator links of rechts moet komen
+      setDropPosition(mouseX < columnCenterX ? 'left' : 'right');
+    } else {
+      setDropPosition(null);
+    }
     
     // Call the original drag over handler
     onDragOver(e);
@@ -70,22 +82,30 @@ const ColumnDragLayer: React.FC<ColumnDragLayerProps> = ({
     if (onDragEnd) {
       setIsDragging(false);
       setIsColumnDrop(false);
+      setDropPosition(null);
       onDragEnd();
     }
+  };
+
+  // Reset dropper position on drag leave
+  const handleDragLeave = () => {
+    setDropPosition(null);
+    onDragLeave();
   };
 
   return (
     <div 
       ref={ref}
       className={cn(
-        "kanban-column", 
+        "kanban-column relative", 
         isDragOver && "border-primary/70",
-        isDragOver && isColumnDrop ? "column-drop-indicator" : "",
         isDragOver && !isColumnDrop ? "bg-kanban-column-hover" : "",
+        isDragOver && isColumnDrop && dropPosition === 'left' && "kanban-drag-over-left",
+        isDragOver && isColumnDrop && dropPosition === 'right' && "kanban-drag-over-right",
         isDragging && "opacity-50 border-primary/50"
       )}
       onDragOver={handleDragOver}
-      onDragLeave={onDragLeave}
+      onDragLeave={handleDragLeave}
       onDrop={onDrop}
       draggable={draggable}
       onDragStart={handleDragStart}

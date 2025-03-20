@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -11,6 +10,7 @@ import {
 } from '@/components/ui/select';
 import { Column, Pipeline } from '@/types';
 import PipelineSelector from './PipelineSelector';
+import { ArrowRight, Tag, X, ListPlus, FileDown } from 'lucide-react';
 
 interface BulkActionsProps {
   selectedCount: number;
@@ -62,54 +62,40 @@ const BulkActions: React.FC<BulkActionsProps> = ({
   };
   
   return (
-    <div className="bg-primary/5 px-6 py-2 border-b border-border/40 flex items-center justify-between animate-slide-down">
-      <div className="text-sm">
-        <span className="font-medium">{selectedCount}</span> leads geselecteerd
+    <div className="fixed top-0 left-0 right-0 z-30 bg-background/95 backdrop-blur-md border-b border-border/40 shadow-lg px-6 py-3 flex items-center justify-between animate-fade-in">
+      <div className="flex-1 flex justify-start">
+        <div className="text-sm font-medium bg-primary/10 px-3 py-1.5 rounded-full flex items-center">
+          <span className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-xs mr-2">
+            {selectedCount}
+          </span>
+          <span>geselecteerd</span>
+        </div>
       </div>
       
-      <div className="flex items-center gap-2">
-        <Popover open={isMoveBulkOpen} onOpenChange={setIsMoveBulkOpen}>
-          <PopoverTrigger asChild>
-            <Button size="sm" variant="outline">
-              Verplaatsen naar kolom
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64">
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">
-                Verplaats {selectedCount} leads naar:
-              </h3>
-              <Select onValueChange={setTargetColumnId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecteer kolom" />
-                </SelectTrigger>
-                <SelectContent>
-                  {columns.map((column) => (
-                    <SelectItem key={column.id} value={column.id}>
-                      {column.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" size="sm" onClick={() => setIsMoveBulkOpen(false)}>Annuleren</Button>
-                <Button size="sm" onClick={handleBulkMove}>Verplaatsen</Button>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-        
-        <Button size="sm" variant="outline">
-          Label toevoegen
+      <div className="flex-1 flex items-center justify-center gap-2">
+        <Button 
+          size="sm" 
+          variant="ghost"
+          className="gap-2 hover:bg-primary/10 hover:text-primary transition-colors"
+        >
+          <Tag className="h-4 w-4" />
+          <span>Label</span>
         </Button>
+        
+        <div className="h-4 w-px bg-border mx-1"></div>
         
         <Popover open={isPipelineSelectorOpen} onOpenChange={setIsPipelineSelectorOpen}>
           <PopoverTrigger asChild>
-            <Button size="sm" variant="outline">
-              Toevoegen aan pipeline
+            <Button 
+              size="sm" 
+              variant="ghost"
+              className="gap-2 hover:bg-primary/10 hover:text-primary transition-colors"
+            >
+              <ListPlus className="h-4 w-4" />
+              <span>Pipeline</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="p-0" align="end">
+          <PopoverContent className="p-0 rounded-xl shadow-lg border-border/60" align="end">
             <div className="w-full">
               <PipelineSelector
                 pipelines={pipelines}
@@ -120,8 +106,12 @@ const BulkActions: React.FC<BulkActionsProps> = ({
               />
               
               {selectedPipelines.length > 0 && (
-                <div className="p-3 pt-0 flex justify-end">
-                  <Button size="sm" onClick={handleAddToPipelines}>
+                <div className="p-3 pt-0 flex justify-end bg-secondary/10 rounded-b-xl">
+                  <Button 
+                    size="sm" 
+                    className="bg-primary hover:bg-primary/90"
+                    onClick={handleAddToPipelines}
+                  >
                     Toevoegen aan {selectedPipelines.length} pipeline{selectedPipelines.length > 1 ? 's' : ''}
                   </Button>
                 </div>
@@ -130,13 +120,26 @@ const BulkActions: React.FC<BulkActionsProps> = ({
           </PopoverContent>
         </Popover>
         
-        <Button size="sm" variant="outline">Exporteren</Button>
+        <div className="h-4 w-px bg-border mx-1"></div>
+        
+        <Button 
+          size="sm" 
+          variant="ghost"
+          className="gap-2 hover:bg-primary/10 hover:text-primary transition-colors"
+        >
+          <FileDown className="h-4 w-4" />
+          <span>Exporteren</span>
+        </Button>
+      </div>
+      
+      <div className="flex-1 flex justify-end">
         <Button 
           size="sm" 
           variant="ghost"
           onClick={onClearSelection}
+          className="rounded-full w-8 h-8 p-0 hover:bg-destructive/10 hover:text-destructive transition-colors"
         >
-          Annuleren
+          <X className="h-4 w-4" />
         </Button>
       </div>
     </div>

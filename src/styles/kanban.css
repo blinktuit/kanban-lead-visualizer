@@ -1,29 +1,30 @@
-
-/* Column drop indicator styles */
-.column-drop-indicator {
-  position: relative;
-}
-
-.column-drop-indicator::before {
+/* Kolom drop indicator en drag styles */
+.kanban-column.kanban-drag-over-left::before {
   content: '';
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -8px;
-  width: 4px;
+  top: 50%;
+  bottom: auto;
+  left: -6px;
+  width: 6px;
+  height: 48px;
+  transform: translateY(-50%);
   background-color: hsl(var(--primary));
-  border-radius: 2px;
+  border-radius: 4px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
 }
 
-.column-drop-indicator::after {
+.kanban-column.kanban-drag-over-right::after {
   content: '';
   position: absolute;
-  top: 0;
-  bottom: 0;
-  right: -8px;
-  width: 4px;
+  top: 50%;
+  bottom: auto;
+  right: -6px;
+  width: 6px;
+  height: 48px;
+  transform: translateY(-50%);
   background-color: hsl(var(--primary));
-  border-radius: 2px;
+  border-radius: 4px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Horizontal scrolling container */
@@ -37,7 +38,7 @@
 
 .kanban-flex-container {
   display: flex;
-  gap: 16px;
+  gap: 6px;
   padding: 8px;
   min-height: calc(100vh - 180px);
   scrollbar-width: thin;
@@ -73,9 +74,10 @@
   line-height: 1.2;
   height: 1.5rem;
   white-space: nowrap;
-  max-width: 120px;
+  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: center;
 }
 
 .tag-blue {
@@ -89,8 +91,8 @@
 }
 
 .tag-purple {
-  background-color: rgb(237, 233, 254);
-  color: rgb(126, 34, 206);
+  background-color: rgb(243, 242, 255);
+  color: rgb(147, 51, 234);
 }
 
 .tag-amber {
@@ -109,7 +111,7 @@
   color: hsl(var(--muted-foreground));
   cursor: pointer;
   transition: all 0.2s;
-  margin-right: 4px;
+  margin-left: 4px;
 }
 
 .tag-dashed:hover {
@@ -130,19 +132,80 @@
 .kanban-card {
   height: 110px;
   overflow: hidden;
-  padding: 12px;
+  padding: 0.4em !important;
+  padding-right: 0.8em !important;
   margin-bottom: 8px;
   transition: all 0.2s ease-out;
   border-radius: 8px;
   border: 1px solid hsl(var(--border));
   background-color: hsl(var(--card));
+  position: relative;
 }
 
-/* Column content styling */
-.kanban-column-content {
-  flex-grow: 1;
-  overflow: hidden;
-  height: 100%;
+/* Card content layout - minimale padding */
+.kanban-card > div {
+  padding: 0 !important;
+}
+
+/* Verwijder eerder toegevoegde "alles geen padding" regels,
+   nu we juist wel weer een algemene padding willen */
+/* Verwijder expliciete padding op elke element binnen de kaart */
+.kanban-card * {
+  padding-left: initial;
+  padding-top: initial;
+  padding-bottom: initial;
+}
+
+/* Profielfoto minder padding - herstel originalere waarde */
+.kanban-card .pl-7 {
+  padding-left: 0.75rem;
+}
+
+/* Profile image styling - basisstijl voor initialen/afbeeldingen */
+.kanban-card span.initials {
+  font-weight: bold;
+  color: #444;
+  font-size: 12px;
+  user-select: none;
+}
+
+/* Profile selector styling */
+.profile-selector {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+  background-color: hsl(var(--muted));
+}
+
+.profile-selector:hover {
+  transform: scale(1.05);
+}
+
+.profile-selected {
+  box-shadow: 0 0 0 2px hsl(var(--primary));
+}
+
+/* Checkbox styling */
+.kanban-card .modern-checkbox {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  margin: 0;
+  padding: 0;
+  transform: none !important;
+  transition: opacity 0.2s ease-out;
+  z-index: 2;
+}
+
+/* Ensure no transform on hover or state changes */
+.kanban-card .modern-checkbox:hover,
+.kanban-card .modern-checkbox[data-state="checked"],
+.kanban-card .modern-checkbox[data-state="unchecked"] {
+  transform: none !important;
 }
 
 /* Fixed top navigation */
@@ -180,7 +243,7 @@
   border-radius: 8px;
   border: 1px solid hsl(var(--border));
   background-color: hsl(var(--kanban-column));
-  padding: 12px;
+  padding: 12px 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
@@ -191,4 +254,14 @@
   z-index: 50;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Animation for bulk actions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
 }

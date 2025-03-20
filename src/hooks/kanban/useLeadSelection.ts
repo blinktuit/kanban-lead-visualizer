@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Lead } from '@/types';
 
@@ -15,34 +14,38 @@ export function useLeadSelection() {
   }, [selectedLeads]);
   
   const handleSelectLead = (leadId: string, selected: boolean) => {
-    const newSelected = new Set(selectedLeads);
-    if (selected) {
-      newSelected.add(leadId);
-    } else {
-      newSelected.delete(leadId);
-    }
-    setSelectedLeads(newSelected);
+    setSelectedLeads(prev => {
+      const newSelected = new Set(prev);
+      if (selected) {
+        newSelected.add(leadId);
+      } else {
+        newSelected.delete(leadId);
+      }
+      return newSelected;
+    });
   };
   
   const handleSelectAllInColumn = (columnLeads: Lead[]) => {
-    // If all are already selected, deselect all
-    const allAlreadySelected = columnLeads.every(lead => selectedLeads.has(lead.id));
-    
-    const newSelected = new Set(selectedLeads);
-    
-    if (allAlreadySelected) {
-      // Deselect all in this column
-      columnLeads.forEach(lead => {
-        newSelected.delete(lead.id);
-      });
-    } else {
-      // Select all in this column
-      columnLeads.forEach(lead => {
-        newSelected.add(lead.id);
-      });
-    }
-    
-    setSelectedLeads(newSelected);
+    setSelectedLeads(prev => {
+      const newSelected = new Set(prev);
+      
+      // Check if all leads in this column are already selected
+      const allAlreadySelected = columnLeads.every(lead => prev.has(lead.id));
+      
+      if (allAlreadySelected) {
+        // Deselect all in this column
+        columnLeads.forEach(lead => {
+          newSelected.delete(lead.id);
+        });
+      } else {
+        // Select all in this column
+        columnLeads.forEach(lead => {
+          newSelected.add(lead.id);
+        });
+      }
+      
+      return newSelected;
+    });
   };
   
   const handleClearSelection = () => {

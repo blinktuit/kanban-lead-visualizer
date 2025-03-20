@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
-import { MoreHorizontal, MessageSquare, Tag, ArrowRight, ListPlus, RefreshCw, Plus } from 'lucide-react';
+import { MoreHorizontal, MessageSquare, Tag, ArrowRight, ListPlus, RefreshCw, Plus, Check } from 'lucide-react';
 import { Lead, Tag as TagType, KanbanSettings } from '@/types';
 import { cn } from '@/lib/utils';
+import { getAvatarColor, getInitials, getAvatarUrl } from '@/utils/avatar';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { Checkbox } from '@/components/ui/checkbox';
 
 interface LeadCardProps {
   lead: Lead;
@@ -28,7 +27,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
   onAddToPipeline
 }) => {
   const [isHovering, setIsHovering] = useState(false);
+  const [imageError, setImageError] = useState(false);
   
+  // Tag helpers
   const getTagClass = (color: TagType['color']) => {
     switch(color) {
       case 'blue': return 'tag-blue';
@@ -41,21 +42,24 @@ const LeadCard: React.FC<LeadCardProps> = ({
   };
   
   const getStatusBadge = () => {
-    if (lead.connectionStatus === 'pending') {
-      return (
-        <div className="flex items-center mt-1.5">
-          <span className="inline-flex items-center text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
-            <span className="mr-1 w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse"></span>
-            Verbinding in behandeling
-          </span>
-        </div>
-      );
-    }
     return null;
   };
   
-  // Only display one tag as requested
+  // Check if there are multiple tags
   const displayTag = lead.tags.length > 0 ? lead.tags[0] : null;
+  const hasMultipleTags = lead.tags.length > 1;
+  
+  // Get avatar info
+  const avatarInitials = getInitials(lead.name);
+  const avatarColor = getAvatarColor(lead.name);
+  const avatarUrl = getAvatarUrl(lead.name);
+  
+  // Bepaal de tekstkleur (wit voor donkere achtergronden, donker voor lichte)
+  const textColor = avatarColor.startsWith('#3') || 
+                    avatarColor.startsWith('#9') || 
+                    avatarColor.startsWith('#34') || 
+                    avatarColor.startsWith('#8e') ? 
+                    'white' : '#34495e';
   
   return (
     <div 
@@ -67,31 +71,41 @@ const LeadCard: React.FC<LeadCardProps> = ({
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      {/* Checkbox - only visible when hovering or when in selection mode */}
-      <div className={cn(
-        "absolute top-2 left-2 transition-opacity duration-150",
-        (isHovering || selectionActive) ? "opacity-100" : "opacity-0"
-      )}>
-        <Checkbox
-          checked={selected}
-          onCheckedChange={() => onSelect(lead.id)}
-          className="modern-checkbox"
-        />
-      </div>
-
-      <div className="flex items-start pl-7">
-        <div 
-          className="w-10 h-10 rounded-full bg-muted flex-shrink-0 flex items-center justify-center overflow-hidden"
-          style={{ opacity: isHovering ? 0.8 : 1 }}
-        >
-          {lead.photoUrl ? (
-            <img src={lead.photoUrl} alt={lead.name} className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-sm font-medium">{lead.name.charAt(0)}</span>
+      <div className="flex items-start pt-1">
+        <button 
+          onClick={() => onSelect(lead.id)}
+          className={cn(
+            "relative w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden",
+            selected ? "ring-2 ring-primary ring-offset-1" : "hover:ring-2 hover:ring-primary/50",
+            "transition-all duration-200 shadow-sm"
           )}
-        </div>
+          style={!imageError ? {} : { backgroundColor: avatarColor }}
+          title={`Selecteer ${lead.name}`}
+        >
+          {!imageError ? (
+            <img 
+              src={avatarUrl}
+              alt={lead.name}
+              className="w-full h-full object-cover"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <span 
+              className="text-xs font-bold select-none" 
+              style={{ color: textColor }}
+            >
+              {avatarInitials}
+            </span>
+          )}
+          
+          {selected && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+              <Check className="text-white h-3 w-3 drop-shadow" />
+            </div>
+          )}
+        </button>
         
-        <div className="ml-3 flex-1 overflow-hidden">
+        <div className="ml-2 flex-1 overflow-hidden pr-0.5">
           <h3 className="font-medium text-sm truncate">{lead.name}</h3>
           
           {settings.cardFields.showJobTitle && (
@@ -107,20 +121,58 @@ const LeadCard: React.FC<LeadCardProps> = ({
             <div className="flex justify-between items-center mt-2">
               <div className="flex items-center gap-1 flex-wrap">
                 {displayTag && (
-                  <span className={cn("tag", getTagClass(displayTag.color))}>
+                  <span 
+                    className={cn("tag", getTagClass(displayTag.color), "cursor-pointer")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!selectionActive && onAddLabel) {
+                        onAddLabel(lead.id);
+                      }
+                    }}
+                    title="Klik om labels te bewerken"
+                  >
                     {displayTag.name}
+                    {hasMultipleTags && (
+                      <span className="ml-1 text-xs text-muted-foreground">
+                        +{lead.tags.length - 1}
+                      </span>
+                    )}
                   </span>
                 )}
-                <button 
-                  className="tag tag-dashed inline-flex"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddLabel?.(lead.id);
-                  }}
-                >
-                  <Plus className="h-2.5 w-2.5 mr-1" />
-                  Label
-                </button>
+                {displayTag ? (
+                  <button 
+                    className={cn(
+                      "tag-add-button w-5 h-5 flex items-center justify-center rounded-full border border-dashed border-muted-foreground/50 ml-1",
+                      isHovering ? "opacity-100" : "opacity-0"
+                    )}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!selectionActive) {
+                        onAddLabel?.(lead.id);
+                      }
+                    }}
+                    title="Label toevoegen"
+                  >
+                    <Plus className="h-3 w-3 text-muted-foreground" />
+                  </button>
+                ) : (
+                  <button 
+                    className={cn(
+                      "transition-opacity duration-150 flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full border border-dashed border-muted-foreground/40",
+                      isHovering ? "opacity-100" : "opacity-0"
+                    )}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!selectionActive) {
+                        onAddLabel?.(lead.id);
+                      }
+                    }}
+                    title="Label toevoegen"
+                  >
+                    <Plus className="h-2.5 w-2.5 text-muted-foreground" />
+                    <span className="text-muted-foreground">label</span>
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -129,11 +181,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
         <div>
           <Popover>
             <PopoverTrigger asChild>
-              <button className="text-muted-foreground hover:text-foreground p-0.5 rounded">
-                <MoreHorizontal className="h-4 w-4" />
+              <button className="text-muted-foreground hover:text-foreground p-0.5 rounded -mr-2">
+                <MoreHorizontal className="h-3.5 w-3.5" />
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-48 p-2" align="end" sideOffset={5}>
+            <PopoverContent className="w-56 p-2" align="end" sideOffset={5}>
               <div className="flex flex-col space-y-1">
                 <button className="kanban-menu-item">
                   <MessageSquare className="h-4 w-4" />
@@ -143,7 +195,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   className="kanban-menu-item"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onAddLabel?.(lead.id);
+                    if (!selectionActive) {
+                      onAddLabel?.(lead.id);
+                    }
                   }}
                 >
                   <Tag className="h-4 w-4" />

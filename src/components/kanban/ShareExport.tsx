@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Share, Download } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { cn } from '@/lib/utils';
 
 interface ShareExportProps {
   pipelineId: string;
@@ -24,23 +23,19 @@ const ShareExport: React.FC<ShareExportProps> = ({ pipelineId }) => {
   };
   
   return (
-    <div className="flex items-center gap-2">
-      <Button 
-        variant="outline"
-        size="sm"
+    <div className="space-y-2">
+      <div 
+        className="flex items-center gap-2 text-sm w-full cursor-pointer"
         onClick={handleShare}
       >
-        <Share className="h-4 w-4 mr-2" />
-        Delen
-      </Button>
+        <Share className="h-4 w-4" />
+        <span>Delen</span>
+      </div>
       
-      <Button 
-        variant="outline"
-        size="sm"
-      >
-        <Download className="h-4 w-4 mr-2" />
-        Exporteren
-      </Button>
+      <div className="flex items-center gap-2 text-sm w-full cursor-pointer">
+        <Download className="h-4 w-4" />
+        <span>Exporteren</span>
+      </div>
     </div>
   );
 };

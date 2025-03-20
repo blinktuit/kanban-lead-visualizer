@@ -1,7 +1,5 @@
-
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 
 interface PipelineTitleProps {
   title: string;
@@ -20,33 +18,45 @@ const PipelineTitle: React.FC<PipelineTitleProps> = ({
   setIsEditing,
   onUpdateTitle
 }) => {
-  const handleCancel = () => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      onUpdateTitle();
+    } else if (e.key === 'Escape') {
+      setEditedTitle(title);
+      setIsEditing(false);
+    }
+  };
+  
+  const handleBlur = () => {
+    if (editedTitle.trim() !== title && editedTitle.trim() !== '') {
+      onUpdateTitle();
+    } else {
+      setEditedTitle(title);
+    }
     setIsEditing(false);
-    setEditedTitle(title);
   };
   
   if (isEditing) {
     return (
       <div className="flex items-center">
         <Input
+          ref={inputRef}
           value={editedTitle}
           onChange={(e) => setEditedTitle(e.target.value)}
-          className="w-64 mr-2"
+          className="w-64"
           autoFocus
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') onUpdateTitle();
-            if (e.key === 'Escape') handleCancel();
-          }}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
         />
-        <Button size="sm" onClick={onUpdateTitle}>Opslaan</Button>
-        <Button 
-          size="sm" 
-          variant="ghost" 
-          onClick={handleCancel}
-          className="ml-1"
-        >
-          Annuleren
-        </Button>
       </div>
     );
   }
